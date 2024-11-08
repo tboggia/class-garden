@@ -23,40 +23,42 @@
     </div>
 
     <div class="space-y-2">
-      <div
+      <button
         v-for="section in sections"
         :key="section.id"
-        class="flex items-center gap-2 p-3 rounded border"
+        class="flex w-full justify-between gap-2 p-3 rounded border cursor-pointer"
         :class="[
           section.id === activeSectionId
             ? 'bg-blue-50 border-blue-500'
             : 'border-gray-200 hover:bg-gray-50',
         ]"
+        @click="$emit('select-section', section.id)"
       >
         <div
-          class="flex-grow cursor-pointer"
-          @click="$emit('select-section', section.id)"
+          class="flex-grow"
         >
-          <div class="font-semibold">Period {{ section.periodNumber }}</div>
+          <div class="font-semibold text-left">Period {{ section.periodNumber }}</div>
         </div>
-        <button
-          @click="openEditSection(section)"
-          class="text-gray-500 hover:text-blue-500"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <!-- Edit Section Modal
+          <button
+            @click="openEditSection(section)"
+            class="text-gray-500 hover:text-blue-500"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-            />
-          </svg>
-        </button>
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+          </button> 
+        -->
         <button
           @click="confirmDeleteSection(section)"
           class="text-gray-500 hover:text-red-500"
@@ -80,16 +82,16 @@
             />
           </svg>
         </button>
-      </div>
+      </button>
     </div>
-
-    <EditSectionModal
-      :show="showSectionModal"
-      :section="selectedSection"
-      @close="showSectionModal = false"
-      @save="saveSection"
-    />
-
+    <!-- Edit Section Modal
+      <EditSectionModal
+        :show="showSectionModal"
+        :section="selectedSection"
+        @close="showSectionModal = false"
+        @save="saveSection"
+      />
+    -->
     <EditGridModal
       :show="showGridModal"
       :initial-rows="Number(store.state.gridRows || 5)"
@@ -154,7 +156,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      showSectionModal: false,
+      /** Edit Section Modal
+        showSectionModal: false, 
+      */ 
       showGridModal: false,
       showDeleteModal: false,
       selectedSection: null as ClassSection | null,
@@ -166,10 +170,12 @@ export default Vue.extend({
     openAddSection() {
       this.$emit('add-section', {periodNumber: this.sections.length + 1});
     },
-    openEditSection(section: ClassSection) {
-      this.selectedSection = section;
-      this.showSectionModal = true;
-    },
+    /** Edit Section Modal
+      openEditSection(section: ClassSection) {
+        this.selectedSection = section;
+        this.showSectionModal = true;
+      },
+    */ 
     confirmDeleteSection(section: ClassSection) {
       this.sectionToDelete = section;
       this.showDeleteModal = true;
@@ -181,13 +187,15 @@ export default Vue.extend({
         this.sectionToDelete = null;
       }
     },
-    saveSection(section: ClassSection) {
-      this.$emit(
-        this.selectedSection ? 'update-section' : 'add-section',
-        section
-      );
-      this.showSectionModal = false;
-    },
+    /** Edit Section Modal
+      saveSection(section: ClassSection) {
+        this.$emit(
+          this.selectedSection ? 'update-section' : 'add-section',
+          section
+        );
+        this.showSectionModal = false;
+      },
+    */ 
     saveGrid({ rows, columns }: { rows: number; columns: number }) {
       this.$emit('update-grid', {
         rows: Number(rows),
