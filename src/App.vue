@@ -83,11 +83,10 @@ export default Vue.extend({
       const newSection: ClassSection = {
         id: Date.now().toString(),
         periodNumber: section.periodNumber,
-        gridRows: this.store.state.gridRows,
-        gridColumns: this.store.state.gridColumns,
         seatAssignments: {},
       };
       this.store.addSection(newSection);
+      // this.setActiveSection(newSection.id);
     },
 
     updateSection(section: ClassSection) {
@@ -108,15 +107,10 @@ export default Vue.extend({
       this.store.addStudent(newStudent);
     },
 
-    updateStudent({
-      student,
-      sections,
-    }: {
-      student: Student;
-      sections: ClassSection[];
-    }) {
+    updateStudent( student: Student ) {
+      
       this.store.updateStudent(student);
-      sections.forEach((section) => {
+      this.store.state.sections.forEach((section) => {
         this.store.updateSection(section);
       });
     },

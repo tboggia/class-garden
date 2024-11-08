@@ -107,7 +107,7 @@ export default Vue.extend({
     }) {
       this.$emit(
         this.selectedStudent ? 'update-student' : 'add-student',
-        student
+        student,
       );
       sections.forEach((section) => {
         this.$emit('update-section', section);

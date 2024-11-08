@@ -159,8 +159,7 @@ export default Vue.extend({
   },
   methods: {
     openAddSection() {
-      this.selectedSection = null;
-      this.showSectionModal = true;
+      this.$emit('add-section', {periodNumber: this.sections.length + 1});
     },
     openEditSection(section: ClassSection) {
       this.selectedSection = section;
