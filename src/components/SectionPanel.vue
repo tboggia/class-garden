@@ -60,6 +60,11 @@
         <button
           @click="confirmDeleteSection(section)"
           class="text-gray-500 hover:text-red-500"
+          :class="[
+            section.periodNumber === sections.length
+              ? 'show'
+              : 'hidden'
+          ]"
         >
           <svg
             class="w-5 h-5"
@@ -96,7 +101,7 @@
     <!-- Delete Confirmation Modal -->
     <div
       v-if="showDeleteModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
       <div class="bg-white rounded-lg p-6 w-96">
         <h3 class="text-lg font-bold mb-4">Delete Period</h3>

@@ -108,7 +108,6 @@ export default Vue.extend({
     },
 
     updateStudent( student: Student ) {
-      
       this.store.updateStudent(student);
       this.store.state.sections.forEach((section) => {
         this.store.updateSection(section);
