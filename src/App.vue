@@ -1,12 +1,30 @@
+<!-- 
+  To Do:
+    Top: Unassigned students
+    In Panel: Students in Period
+    Add period label (e.g. Prep)
+    Field: Latest Assignment # out of 10.
+    Clear Latest Assignment.
+ -->
 <template>
   <div class="min-h-screen bg-gray-100">
-    <nav class="bg-blue-600 text-white p-4">
-      <h1 class="text-xl font-bold">Class Garden</h1>
-    </nav>
+    <NavBanner
+      @update-grid="updateGrid"
+    />
 
     <div class="container mx-auto p-4">
       <div class="grid grid-cols-6 grid-auto-row gap-4">
         <div class="col-span-full w-full">
+          <StudentPanel
+            :students="students"
+            :sections="sections"
+            @add-student="addStudent"
+            @update-student="updateStudent"
+            @update-section="updateSection"
+          />
+        </div>
+
+        <div class="col-span-full md:col-span-2">
           <SectionPanel
             :sections="sections"
             :active-section-id="store.state.activeSectionId"
@@ -14,17 +32,6 @@
             @update-section="updateSection"
             @delete-section="deleteSection"
             @select-section="setActiveSection"
-            @update-grid="updateGrid"
-          />
-        </div>
-
-        <div class="col-span-full md:col-span-2">
-          <StudentPanel
-            :students="students"
-            :sections="sections"
-            @add-student="addStudent"
-            @update-student="updateStudent"
-            @update-section="updateSection"
           />
         </div>
 
@@ -45,6 +52,7 @@
 import Vue from 'vue';
 import { store } from './store';
 import { Student, ClassSection } from './types';
+import NavBanner from './components/NavBanner.vue';
 import SectionPanel from './components/SectionPanel.vue';
 import StudentPanel from './components/StudentPanel.vue';
 import SeatingGrid from './components/SeatingGrid.vue';
@@ -53,6 +61,7 @@ export default Vue.extend({
   name: 'App',
 
   components: {
+    NavBanner,
     SectionPanel,
     StudentPanel,
     SeatingGrid,

@@ -4,21 +4,11 @@
       <h2 class="text-lg font-bold">Class Periods</h2>
       <div class="flex gap-2">
         <button
-          @click="showGridModal = true"
-          class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          Edit Grid
-        </button>
-        <button
           @click="openAddSection()"
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Add Period
         </button>
-      </div>
-      <div class="text-sm text-gray-600 mb-4 w-full">
-        Grid: {{ store.state.gridRows || 4 }} x
-        {{ store.state.gridColumns || 8 }}
       </div>
     </div>
 
@@ -92,13 +82,6 @@
         @save="saveSection"
       />
     -->
-    <EditGridModal
-      :show="showGridModal"
-      :initial-rows="Number(store.state.gridRows || 5)"
-      :initial-columns="Number(store.state.gridColumns || 6)"
-      @close="showGridModal = false"
-      @save="saveGrid"
-    />
 
     <!-- Delete Confirmation Modal -->
     <div
@@ -135,14 +118,12 @@
 import Vue from 'vue';
 import { ClassSection } from '../types';
 import EditSectionModal from './EditSectionModal.vue';
-import EditGridModal from './EditGridModal.vue';
 import { store } from '../store';
 
 export default Vue.extend({
   name: 'SectionPanel',
   components: {
     EditSectionModal,
-    EditGridModal,
   },
   props: {
     sections: {
@@ -159,7 +140,6 @@ export default Vue.extend({
       /** Edit Section Modal
         showSectionModal: false, 
       */ 
-      showGridModal: false,
       showDeleteModal: false,
       selectedSection: null as ClassSection | null,
       sectionToDelete: null as ClassSection | null,
@@ -196,13 +176,6 @@ export default Vue.extend({
         this.showSectionModal = false;
       },
     */ 
-    saveGrid({ rows, columns }: { rows: number; columns: number }) {
-      this.$emit('update-grid', {
-        rows: Number(rows),
-        columns: Number(columns),
-      });
-      this.showGridModal = false;
-    },
   },
 });
 </script>
