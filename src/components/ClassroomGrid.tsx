@@ -36,6 +36,9 @@ export default function ClassroomGrid({
     const newRow = Number(row);
     const newColumn = Number(column);
     
+    const seatTaken = students.some((s) => s.row === newRow && s.column === newColumn);
+    if (seatTaken) return;
+
     onSeatChange(studentId as number, newRow, newColumn);
   }
 
@@ -113,31 +116,52 @@ interface DraggableStudentProps {
 }
 
 function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: student ? student.id : ''
   })
 
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       onClick={() => onSelectStudent(student.id)}
       style={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: "1fr 1rem",
+        gridTemplateRows: "1rem 1fr",
         alignItems: "center",
         justifyContent: "center",
         borderRadius: "6px",
         height: "100%",
-        cursor: "grab",
-        backgroundColor: "blue",
+        cursor: "pointer",
+        zIndex: isDragging ? "9999" : "auto",
+        position: 'relative',
+        backgroundColor: isDragging ? "darkblue" : "blue",
         transition: "transform 50ms ease-in-out",
         transform: transform 
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
       }}
     >
-      {student.name}
+      <span
+        style={{ 
+          gridColumn: '2',
+          gridRow: '1',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'grab',
+          userSelect: 'none',
+          lineHeight: '0',
+          height: '100%',
+         }}
+        {...listeners}
+        {...attributes}
+        aria-label="Drag Element"
+      >
+        ❖
+      </span>
+      <p style={{ gridColumn: '1/-1', gridRow: '1/-1' }}
+      >{student.name}</p>
     </div>
   )
 }

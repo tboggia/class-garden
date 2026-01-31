@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Class, Student, LayoutSettings } from './types/models';
 import ClassSelector from './components/ClassSelector';
 import StudentList from './components/StudentList';
@@ -8,23 +8,47 @@ import './App.css'
 import LayoutSettingsPanel from './components/LayoutSettingsPanel';
 
 function App() {
-  const [classes, setClasses] = useState<Class[]>([
-    { id: 1, name: "A Period" },
-    { id: 2, name: "B Period" },
-    { id: 3, name: "C Period" },
-  ]);
-  const [students, setStudents] = useState<Student[]>([
-    { id: 1, name: "Alice", classId: 1, row: 1, column: 1, spokeUpCount: 0, disruptiveCount: 0 },
-    { id: 2, name: "Bob", classId: 1, row: 1, column: 2, spokeUpCount: 0, disruptiveCount: 0 },
-    { id: 3, name: "Charlie", classId: 1, row: 1, column: 3, spokeUpCount: 0, disruptiveCount: 0 },
-  ]);
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(1);
+  const hasLoaded = useRef(false);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<number | 0>(0);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [layout, setLayout] = useState<LayoutSettings>({
-    rows: 5,
-    columns: 5,
+    rows: 1,
+    columns: 1,
     teacher: ""
   });
+
+  useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+    
+    try {
+      const saved = localStorage.getItem('class-garden-data');
+      
+      if (saved) {
+        const parsed = JSON.parse(saved);
+
+        setClasses(parsed.classes || []);
+        setStudents(parsed.students || []);
+        setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
+      }
+      console.log("finished saving data");
+      return () => {};
+    } catch (error) {
+      console.warn('Failed to load saved data: ', error)
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoaded.current) return;
+    const data = {
+      classes,
+      students,
+      layout
+    };
+    localStorage.setItem("class-garden-data", JSON.stringify(data));
+  }, [classes, students, layout]);
 
   return (
     <>
@@ -51,39 +75,17 @@ function App() {
         }}
       />
       <StudentList
-        students={students.filter((student) => selectedClassId === null || student.classId === selectedClassId)}
+        students={students.filter((student) => selectedClassId === 0 || student.classId === selectedClassId)}
         selectedStudentId={selectedStudentId}
+        classes={classes}
+        selectedClassId={selectedClassId}
         layout={layout}
         onSelectStudent={setSelectedStudentId}
-        onAddStudent={(name) => {
-          if (!selectedClassId) return;
-          const newStudent: Student = {
-            id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
-            name,
-            classId: selectedClassId,
-            row: 0,
-            column: 0,
-            spokeUpCount: 0,
-            disruptiveCount: 0
-          };
-          setStudents([...students, newStudent]);
-        }}
         onUpdateSeating={setStudents}
-        onImportStudents={(names) => {
-          if (!selectedClassId) return;
-
-          const newStudents = names.map((name) => ({
-            id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
-            name,
-            classId: selectedClassId,
-            row: 0,
-            column: 0,
-            spokeUpCount: 0,
-            disruptiveCount: 0
-          }));
-          // setStudents([...students, ...newStudents]);
-        }
-        }
+        onImportStudents={(importedStudents, importedClasses) => {
+          setStudents([...students, ...importedStudents]);
+          setClasses([...classes, ...importedClasses]);
+        }}
       />
       <StudentDetailPanel
         student={students.find((student) => student.id === selectedStudentId) || null}

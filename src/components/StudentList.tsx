@@ -1,23 +1,25 @@
-import type { Student, LayoutSettings } from '../types/models';
+import type { Student, Class, LayoutSettings } from '../types/models';
 
 interface Props {
   students: Student[];
   selectedStudentId: number | null;
+  classes: Class[],
+  selectedClassId: number | 1;
   layout: LayoutSettings;
   onSelectStudent: (id: number) => void;
-  onAddStudent: (name: string) => void;
   onUpdateSeating: (students: Student[]) => void;
-  onImportStudents: (students: Student[]) => void;
+  onImportStudents: (students: Student[], classes: Class[]) => void;
 }
 
 export default function StudentList({
   students,
   selectedStudentId,
+  classes,
+  selectedClassId,
   layout,
   onSelectStudent,
-  onAddStudent,
   onUpdateSeating,
-  onImportStudents
+  onImportStudents,
 }: Props) {
 
   const handleSeatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +46,84 @@ export default function StudentList({
     onUpdateSeating(students);
   }
 
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+
+      const text = event.target?.result as string;
+      const lines = text.split('\n').map((ln) => ln.trim()).filter(Boolean);
+
+      const hasHeader = lines[0].toLowerCase().includes('name');
+      
+      let importedStudents: Student[] = [];
+      let importedClasses: Class[] = [];
+
+      let newClassCount = 0;
+
+      if (hasHeader) {
+        console.log("hasheader");
+        const headers = lines[0].split(',').map(h => h.trim())
+        const rows = lines.slice(1);
+
+        importedStudents = rows.map((line, key) => {
+          const values = line.split(",").map((v) => v.trim());
+          const record: any = {};
+          let newClass: Class | undefined;
+
+          headers.forEach((h, i) => {
+            record[h] = values[i];
+            if (h === 'class') {
+              const studentClass = classes.find(c => c.name === record.class);
+              if (studentClass) {
+                record.classId = studentClass.id;
+              } else {
+                newClass = {
+                  id: classes.length > 0 ? classes[classes.length - 1].id + 1 + newClassCount : 1,
+                  name: record.class,
+                };
+                newClassCount++;
+                importedClasses.push(newClass);
+                record.classId = newClass.id;
+              }
+            }
+          });
+          
+          const newStudent: Student = {
+            id: students.length > 0 ? students[students.length - 1].id + key + 1 : key + 1,
+            name: record.name,
+            classId: record.classId || selectedClassId,
+            row: Number(record.row) || 0,
+            column: Number(record.column) || 0,
+            spokeUpCount: Number(record.spokeUpCount) || 0,
+            disruptiveCount: Number(record.disruptiveCount) || 0,
+          }
+
+          return newStudent;
+        });
+      } else {
+        console.log("doesn't have header");
+        importedStudents = lines.map((name, key) => {
+          const newStudent: Student = {
+            id: students.length > 0 ? students[students.length - 1].id + key + 1 : key + 1,
+            name: name,
+            classId: selectedClassId,
+            row: 0,
+            column: 0,
+            spokeUpCount: 0,
+            disruptiveCount: 0,
+          }
+          return newStudent;
+        });
+      }
+      onImportStudents(importedStudents, importedClasses);
+    }
+    reader.readAsText(file);
+  }
   return (
     <div>
       <h2>Students</h2>
@@ -79,8 +159,7 @@ export default function StudentList({
             </li>
         ))}
       </ul>
-      <button onClick={() => onAddStudent(prompt("Student name?") || "")}>Add Student</button>
-      <button onClick={() => onImportStudents([])}>Import Students</button>
+      <input type="file" accept=".csv" onChange={(e) => handleCSVImport(e)} />
     </div>
   )
 }

@@ -90,3 +90,8 @@ globalLayout ?
   * State.selectedStudent
   * () increase Student.spokeUpCount
   * () increase Student.disruptiveCount
+
+
+## To Do:
+* Pick a random student from active class, no repeats.
+* 
