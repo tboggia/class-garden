@@ -72,6 +72,12 @@ label.label-input-text {
 th {
   @apply text-left;
 }
+tbody tr:not(:first-child) td{
+  @apply pt-1;
+}
+tbody tr:not(:last-child) td{
+  @apply pb-1;
+}
 
 
 

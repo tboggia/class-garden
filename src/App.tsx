@@ -66,13 +66,6 @@ function App() {
               }
               setSelectedStudentId(null);
             }}
-            // onEditClass={(editedClass) => {
-            //   setClasses(classes =>
-            //     classes.map((cls) =>
-            //       cls.id === editedClass.id ? editedClass : cls
-            //     )
-            //   );
-            // }}
             onAddClass={(name) => {
               const newClass: Class = {
                 id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
@@ -87,12 +80,12 @@ function App() {
             layout={layout}
             onSelectStudent={setSelectedStudentId}
             onUpdateSeating={(id, row, column) => {
-            setStudents(
-              students.map((student) =>
-                student.id === id ? { ...student, row, column } : student
+              setStudents(
+                students.map((student) =>
+                  student.id === id ? { ...student, row, column } : student
+                )
               )
-            )
-          }}
+            }}
           />
           <LayoutSettingsPanel
             students={students}
@@ -123,12 +116,20 @@ function App() {
           <ClassroomGrid
             layout={layout}
             students={students.filter((student) => selectedClassId === null || student.classId === selectedClassId)}
+            selectedClass={classes.find((cls) => cls.id === selectedClassId) || null}
             selectedClassId={selectedClassId}
             onSelectStudent={setSelectedStudentId}
             onSeatChange={(id, row, column) => {
               setStudents(
                 students.map((student) =>
                   student.id === id ? { ...student, row, column } : student
+                )
+              )
+            }}
+            onEditClassName={(name) => {
+              setClasses(
+                classes.map((cls) =>
+                  cls.id === selectedClassId ? { ...cls, name } : cls
                 )
               )
             }}

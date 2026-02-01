@@ -5,7 +5,7 @@ interface Props {
   selectedStudentId: number | null;
   layout: LayoutSettings;
   onSelectStudent: (id: number) => void;
-  onUpdateSeating: (student: Student, row: number, column: number) => void;
+  onUpdateSeating: (id: number, row: number, column: number) => void;
 }
 
 export default function StudentList({
@@ -53,7 +53,7 @@ export default function StudentList({
             </tr>
           </thead>
           <tbody>
-            {students.map((student) => (
+            {students.sort((a, b) => a.name.localeCompare(b.name)).map((student) => (
               <tr className="student-list--item" key={student.id}>
                 <td>
                   <button

@@ -8,17 +8,21 @@ import {
 interface Props {
   layout: LayoutSettings;
   students: Student[];
+  selectedClass: Class;
   selectedClassId: number | null;
   onSelectStudent: (id: number) => void;
   onSeatChange: (id: number, row: number, column: number) => void;
+  onEditClassName: (name: string) => void;
 }
 
 export default function ClassroomGrid({
   layout,
   students,
+  selectedClass,
   selectedClassId,
   onSelectStudent,
-  onSeatChange
+  onSeatChange,
+  onEditClassName
 }: Props) {
   const { rows, columns } = layout;
 
@@ -44,13 +48,56 @@ export default function ClassroomGrid({
     onSeatChange(studentId as number, newRow, newColumn);
   }
 
+  const editClassName = () => {
+    const classElement = document.getElementById('class-name');
+    if (!classElement) return;
+    
+    const changeName = () => {
+      
+      const newName = editElement.value.trim();
+      if (newName && selectedClass) {
+        onEditClassName(newName);
+      }
+      editElement.replaceWith(classElement);
+    }
+
+    const editElement = document.createElement('input');
+    
+    editElement.type = 'text';
+    editElement.value = selectedClass?.name || '';
+
+    classElement.replaceWith(editElement);
+    editElement.focus();
+
+    editElement.onblur = changeName;
+
+    editElement.onkeyup = (e) => {
+      if (e.key === "Enter") {
+        editElement.onblur = null;
+        changeName();
+      } else if (e.key === "Escape") {
+        editElement.onblur = null;
+        editElement.replaceWith(classElement);
+      }
+    };
+  }
 
   return (
     <div className={[
       "overflow-hidden",
       selectedClassId === null || students.length > 0 ? "block" : "hidden"
     ].join(" ")}>
-      <h2>Class Grid</h2>
+      <div className="flex gap-2 items-center mb-2 justify-between">
+        <h2 className="!mb-0" id="class-name">{selectedClass?.name}</h2>
+        <p className="!mb-0">
+          <button
+            className="button-small"
+            onClick={editClassName}
+          >
+            Rename class
+          </button>
+        </p>
+      </div>
       <DndContext onDragEnd={handleDragEnd}>
         <div
           className="grid gap-2 overflow-scroll"
