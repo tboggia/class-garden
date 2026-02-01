@@ -52,6 +52,15 @@ button:focus, button:focus-visible,
 .button-small {
   @apply px-2 py-1 text-sm;
 }
+.button-danger {
+  @apply bg-rose-700 text-rose-100;
+}
+.button-danger:hover {
+  @apply bg-rose-600 border-orange-300;
+}
+button[disabled] {
+  @apply bg-gray-600 text-gray-300 cursor-not-allowed border-transparent;
+}
 
 ::file-selector-button {
   @apply block;

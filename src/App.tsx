@@ -8,6 +8,7 @@ import './App.css'
 import LayoutSettingsPanel from './components/LayoutSettingsPanel';
 
 function App() {
+  const [selectedBackupKey, setSelectedBackupKey] = useState<string>('');
   const hasLoaded = useRef(false);
   const [classes, setClasses] = useState<Class[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -22,7 +23,16 @@ function App() {
   useEffect(() => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
-    
+    try {
+      // Remove all but 5 class-garden-data localStorage items
+      const keys = Object.keys(localStorage).filter(key => key.startsWith('class-garden-data-')).sort();
+      const keysToRemove = keys.length - 5;
+      for (let i = 0; i < keysToRemove; i++) {
+        localStorage.removeItem(keys[i]);
+      }
+    } catch (error) {
+      console.warn('Failed to clean up old data: ', error)
+    }
     try {
       const saved = localStorage.getItem('class-garden-data');
       
@@ -47,7 +57,9 @@ function App() {
       students,
       layout
     };
+    const dateString = new Date().toISOString().split('T')[0];
     localStorage.setItem("class-garden-data", JSON.stringify(data));
+    localStorage.setItem(`class-garden-data-${dateString}`, JSON.stringify(data));
   }, [classes, students, layout]);
 
   return (
@@ -111,6 +123,70 @@ function App() {
               setStudents([...students, newStudent]);
             }}
           />
+          <div>
+            <h2>Data Management</h2>
+            <div className="flex flex-col gap-2 mb-6">
+              <select
+                name="backup selection"
+                value={selectedBackupKey}
+                onChange={(e) => setSelectedBackupKey(e.target.value)}
+              >
+                <option value="" disabled>Select Backup</option>
+                {Object.keys(localStorage)
+                  .filter(key => key.startsWith('class-garden-data-'))
+                  .sort()
+                  .reverse()
+                  .map(key => (
+                    <option key={key} value={key}>
+                      {key.replace('class-garden-data-', '')}
+                    </option>
+                  ))
+                }
+              </select>
+              <div>
+                <button
+                  className="button-small"
+                  disabled={!selectedBackupKey}
+                  onClick={() => {
+                  if (!selectedBackupKey) return;
+                  const backupData = localStorage.getItem(selectedBackupKey);
+                  if (backupData) {
+                    try {
+                    const parsed = JSON.parse(backupData);
+                    setClasses(parsed.classes || []);
+                    setStudents(parsed.students || []);
+                    setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
+                    setSelectedClassId(0);
+                    setSelectedStudentId(null);
+                    alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
+                    setSelectedBackupKey('');
+                    } catch (error) {
+                    alert("Failed to restore backup: Invalid backup data.");
+                      setSelectedBackupKey('');
+                    }
+                  }
+                  }}
+                >
+                  Restore Backup
+                </button>
+              </div>
+            </div>
+            <button
+              className="button-small button-danger"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
+                  setClasses([]);
+                  setStudents([]);
+                  setSelectedClassId(0);
+                  setSelectedStudentId(null);
+                  setLayout({ rows: 1, columns: 1, teacher: "" });
+                  localStorage.removeItem("class-garden-data");
+                }
+              }}
+            >
+              Delete all data
+            </button>
+          </div>
         </div>
         <div id="classroom-grid" className="flex flex-col gap-6 w-full overflow-hidden">
           <ClassroomGrid
