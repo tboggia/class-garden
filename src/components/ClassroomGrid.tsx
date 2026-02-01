@@ -192,6 +192,7 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
+        touchAction: "none",
       }}
     >
       <span
