@@ -12,6 +12,7 @@ export default function StudentDetailPanel({
   if (!student) return null;
   return (
     <div 
+      data-is-tooltip
       className={[
         'absolute bg-white/90 p-8 rounded-md left-[54%] top-[41%] text-center text-rose-400',
       ].join(' ')}

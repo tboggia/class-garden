@@ -59,16 +59,20 @@ function App() {
             classes={classes}
             selectedClassId={selectedClassId}
             onSelectClass={(id) => {
+              if (id !== selectedClassId) {
+                setSelectedClassId(id);
+              } else {
+                setSelectedClassId(0);
+              }
               setSelectedStudentId(null);
-              setSelectedClassId(id);
             }}
-            onEditClass={(editedClass) => {
-              setClasses(classes =>
-                classes.map((cls) =>
-                  cls.id === editedClass.id ? editedClass : cls
-                )
-              );
-            }}
+            // onEditClass={(editedClass) => {
+            //   setClasses(classes =>
+            //     classes.map((cls) =>
+            //       cls.id === editedClass.id ? editedClass : cls
+            //     )
+            //   );
+            // }}
             onAddClass={(name) => {
               const newClass: Class = {
                 id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,

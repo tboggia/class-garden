@@ -58,6 +58,12 @@ export default function ClassroomGrid({
             gridTemplateRows: `repeat(${rows}, 60px)`,
             gridTemplateColumns: `repeat(${columns}, 120px)`,
           }}
+          onClick={(e) => {
+            const targetEl = e.target as HTMLElement;
+            if (!targetEl.closest('.seat-cell-occupied')) {
+              onSelectStudent(0);
+            }
+          }}
         >
           {Array.from({ length: rows }).map((_, rowIndex) =>
             Array.from({ length: columns }).map((_, colIndex) => {
@@ -93,7 +99,10 @@ function SeatCell({ row, column, students, onSelectStudent }: SeatCellProps) {
   });
   return (
     <div
-      className="seat-cell"
+      className={[
+        students.length > 0 ? "seat-cell-occupied" : '',
+        "seat-cell"
+      ].join(" ")}
       ref={setDropRef}
       style={{
         border: "1px solid #ccc",

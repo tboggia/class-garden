@@ -4,7 +4,7 @@ interface Props {
   classes: Class[];
   selectedClassId: number | null;
   onSelectClass: (id: number) => void;
-  onEditClass: (editedClass: Class) => void;
+  // onEditClass: (editedClass: Class) => void;
   onAddClass: (name: string) => void;
 }
 
@@ -12,19 +12,19 @@ export default function ClassSelector({
   classes,
   selectedClassId,
   onSelectClass,
-  onEditClass,
+  // onEditClass,
   onAddClass
 }: Props) {
   // function editClass( classId: number ) {
-  function editClass( e: React.MouseEvent<HTMLLIElement, MouseEvent> ) {
-    let classId = e.target.dataset.id;
-    const cls = classes.find(c => c.id === classId);
-    if (!cls) return;
-    const newName = prompt("Edit class name:", cls.name);
-    if (newName && newName.trim() !== "") {
-      onEditClass({ ...cls, name: newName.trim() });
-    }
-  }
+  // function editClass( e: React.MouseEvent<HTMLLIElement, MouseEvent> ) {
+  //   let classId = e.target.dataset.id;
+  //   const cls = classes.find(c => c.id === classId);
+  //   if (!cls) return;
+  //   const newName = prompt("Edit class name:", cls.name);
+  //   if (newName && newName.trim() !== "") {
+  //     onEditClass({ ...cls, name: newName.trim() });
+  //   }
+  // }
 
   return (
     <div>
@@ -39,7 +39,6 @@ export default function ClassSelector({
                 cursor: "pointer"
               }}
               onClick={() => onSelectClass(cls.id)}
-              onDoubleClick={editClass}
             >
               <span data-id={cls.id.toString()} className={`class-${cls.id.toString()}`}>{cls.name}</span>
             </li>
