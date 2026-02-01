@@ -23,7 +23,7 @@ export default function StudentDetailPanel({
           type="button"
           onClick={() => onIncrementValue('spokeUpCount')}
         >
-          👍🏼 {student.spokeUpCount}
+          👍 {student.spokeUpCount}
         </button>
         <button
           type="button"

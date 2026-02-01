@@ -7,8 +7,8 @@ import ImportStudents from './ImportStudents';
 
 interface Props {
   layout: LayoutSettings;
-  students: Student[];
-  classes: Class[];
+  students: Student[] | [];
+  classes: Class[] | [];
   selectedClassId: number | 0;
   onUpdateLayout: (layout: LayoutSettings) => void;
   onImportStudents: (students: Student[], classes: Class[]) => void;
@@ -32,7 +32,7 @@ export default function LayoutSettingsPanel({
   return (
     <div>
       <h3>Classroom Settings</h3>
-      <form className="flex flex-col gap-3">
+      <form className="flex flex-col gap-4">
         <label className="label-input-number">
           Rows: 
           <input 

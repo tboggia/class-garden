@@ -1,4 +1,4 @@
-import type { Student, Class, LayoutSettings } from '../types/models';
+import type { Student, LayoutSettings } from '../types/models';
 
 interface Props {
   students: Student[];

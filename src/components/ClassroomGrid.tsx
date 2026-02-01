@@ -1,14 +1,15 @@
-import type { Student, LayoutSettings } from '../types/models';
+import type { Student, Class, LayoutSettings } from '../types/models';
 import {
   DndContext,
   useDraggable,
-  useDroppable
+  useDroppable,
 } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 
 interface Props {
   layout: LayoutSettings;
-  students: Student[];
-  selectedClass: Class;
+  students: Student[] | [];
+  selectedClass: Class | null;
   selectedClassId: number | null;
   onSelectStudent: (id: number) => void;
   onSeatChange: (id: number, row: number, column: number) => void;
@@ -34,7 +35,7 @@ export default function ClassroomGrid({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const studentId = event.active.id;
-    const dropTarget = event.over?.id;
+    const dropTarget: string | 0 = event.over?.id as string;
 
     if (!dropTarget) return;
 
@@ -88,8 +89,8 @@ export default function ClassroomGrid({
       selectedClassId === null || students.length > 0 ? "block" : "hidden"
     ].join(" ")}>
       <div className="flex gap-2 items-center mb-2 justify-between">
-        <h2 className="!mb-0" id="class-name">{selectedClass?.name}</h2>
-        <p className="!mb-0">
+        <h2 className="mb-0!" id="class-name">{selectedClass?.name}</h2>
+        <p className="mb-0!">
           <button
             className="button-small"
             onClick={editClassName}
@@ -182,7 +183,7 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
       ref={setNodeRef}
       onClick={() => onSelectStudent(student.id)}
       className={[
-        "grid grid-cols-[1fr_1rem] grid-rows-[1rem_1fr]",
+        "grid grid-cols-[1fr_1rem] grid-rows-[1rem_1fr] border border-rose-100",
         "rounded-md items-center justify-center h-full cursor-pointer relative text-center",
         isDragging ? "z-10 bg-teal-950 text-rose-100" : "z-auto bg-teal-700 text-rose-100",
       ].join(" ")}
@@ -211,7 +212,11 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
       >
         ❖
       </span>
-      <p style={{ gridColumn: '1/-1', gridRow: '1/-1' }}
+      <p
+        className={[
+          "overflow-wrap leading-0"
+        ].join(" ")} 
+        style={{ gridColumn: '1/-1', gridRow: '1/-1' }}
       >{student.name}</p>
     </div>
   )

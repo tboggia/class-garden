@@ -65,7 +65,7 @@ function App() {
 
   return (
     <>
-      <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-[1400px] m-6">
+      <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-350 m-6">
         <div className="col-span-full flex justify-between items-center">
           <h1>{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
           <button
@@ -76,7 +76,63 @@ function App() {
             ⚙️
           </button>
         </div>
-        <div id="sidebar" className="flex flex-col gap-6">
+
+        {students.length === 0 && (
+          <div className="welcome-screen col-span-full w-1/2 mx-auto mt-6 flex flex-col gap-4">
+            <div className="bg-teal-800 text-teal-100 rounded-md p-4">
+              <p className="mb-2">Welcome to Class Garden! To get started, please create a class and add some students.</p>
+              <p>You can add students manually or import them from a CSV file in the settings.</p>
+            </div>
+            <LayoutSettingsPanel
+              students={students}
+              classes={classes}
+              selectedClassId={selectedClassId}
+              layout={layout}
+              onUpdateLayout={setLayout}
+              onImportStudents={(importedStudents, importedClasses) => {
+                setStudents([...students, ...importedStudents]);
+                setClasses([...classes, ...importedClasses]);
+              }}
+              onAddStudent={(name) => {
+                if (!selectedClassId) return;
+                const newStudent: Student = {
+                  id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
+                  name,
+                  classId: selectedClassId,
+                  row: 0,
+                  column: 0,
+                  spokeUpCount: 0,
+                  disruptiveCount: 0
+                };
+                setStudents([...students, newStudent]);
+              }}
+            />
+            <ClassSelector
+              classes={classes}
+              selectedClassId={selectedClassId}
+              onSelectClass={(id) => {
+                if (id !== selectedClassId) {
+                  setSelectedClassId(id);
+                } else {
+                  setSelectedClassId(0);
+                }
+                setSelectedStudentId(null);
+              }}
+              onAddClass={(name) => {
+                const newClass: Class = {
+                  id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
+                  name
+                };
+                setClasses([...classes, newClass]);
+              }}
+            />
+          </div>
+        )}
+
+        <div id="sidebar" className={[
+          "flex-col gap-6",
+          students.length === 0 ? "hidden" : "flex"
+        ].join(" ")}>
           <ClassSelector
             classes={classes}
             selectedClassId={selectedClassId}
@@ -135,11 +191,12 @@ function App() {
           <StudentDetailPanel
             student={students.find((student) => student.id === selectedStudentId) || null}
             onIncrementValue={(type) => {
+              const incrementType = type as 'spokeUpCount' | 'disruptiveCount';
               if (selectedStudentId === null) return;
               setStudents((prevStudents) =>
                 prevStudents.map((student) =>
                   student.id === selectedStudentId
-                    ? { ...student, [type]: student[type] + 1 }
+                    ? { ...student, [incrementType]: student[incrementType] + 1 }
                     : student
                 )
               );
@@ -152,7 +209,7 @@ function App() {
         <div className="fixed inset-0 bg-teal-950/95 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
           <div className="bg-white text-teal-950 rounded-lg p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="!mb-0">Settings</h2>
+              <h2 className="mb-0!">Settings</h2>
               <button onClick={() => setShowSettings(false)} className="button-small">×</button>
             </div>
             

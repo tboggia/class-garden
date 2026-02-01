@@ -5,12 +5,12 @@ import type {
 } from '../types/models';
 
 interface Props {
-  students: Student[];
-  classes: Class[];
+  students: Student[] | [];
+  classes: Class[] | [];
   layout: LayoutSettings;
   selectedClassId: number | 0;
   onUpdateLayout: (layout: LayoutSettings) => void;
-  onImportStudents: (students: Student[], classes: Class[]) => void;
+  onImportStudents: (students: Student[] | [], classes: Class[] | []) => void;
 }
 
 export default function ImportStudents({
@@ -126,7 +126,7 @@ export default function ImportStudents({
   return (
     <div>
       <h3 className="">Import Students:</h3>
-      <label htmlFor="csv-import" className="block max-w-32 flex flex-col gap-2">
+      <label htmlFor="csv-import" className="max-w-40 flex flex-col gap-2">
         <input id="csv-import" type="file" accept=".csv" onChange={(e) => handleCSVImport(e)} />
       </label>
     </div>

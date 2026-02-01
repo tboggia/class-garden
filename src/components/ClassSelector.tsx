@@ -15,17 +15,6 @@ export default function ClassSelector({
   // onEditClass,
   onAddClass
 }: Props) {
-  // function editClass( classId: number ) {
-  // function editClass( e: React.MouseEvent<HTMLLIElement, MouseEvent> ) {
-  //   let classId = e.target.dataset.id;
-  //   const cls = classes.find(c => c.id === classId);
-  //   if (!cls) return;
-  //   const newName = prompt("Edit class name:", cls.name);
-  //   if (newName && newName.trim() !== "") {
-  //     onEditClass({ ...cls, name: newName.trim() });
-  //   }
-  // }
-
   return (
     <div>
       <h2>Classes</h2>
