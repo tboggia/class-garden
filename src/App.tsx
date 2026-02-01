@@ -86,7 +86,13 @@ function App() {
             selectedStudentId={selectedStudentId}
             layout={layout}
             onSelectStudent={setSelectedStudentId}
-            onUpdateSeating={setStudents}
+            onUpdateSeating={(id, row, column) => {
+            setStudents(
+              students.map((student) =>
+                student.id === id ? { ...student, row, column } : student
+              )
+            )
+          }}
           />
           <LayoutSettingsPanel
             students={students}
@@ -97,6 +103,19 @@ function App() {
             onImportStudents={(importedStudents, importedClasses) => {
               setStudents([...students, ...importedStudents]);
               setClasses([...classes, ...importedClasses]);
+            }}
+            onAddStudent={(name) => {
+              if (!selectedClassId) return;
+              const newStudent: Student = {
+                id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
+                name,
+                classId: selectedClassId,
+                row: 0,
+                column: 0,
+                spokeUpCount: 0,
+                disruptiveCount: 0
+              };
+              setStudents([...students, newStudent]);
             }}
           />
         </div>

@@ -5,7 +5,7 @@ interface Props {
   selectedStudentId: number | null;
   layout: LayoutSettings;
   onSelectStudent: (id: number) => void;
-  onUpdateSeating: (students: Student[]) => void;
+  onUpdateSeating: (student: Student, row: number, column: number) => void;
 }
 
 export default function StudentList({
@@ -37,19 +37,19 @@ export default function StudentList({
 
     student[field] = Number(e.target.value);
     e.target.dataset.previousValue = e.target.value;
-    onUpdateSeating(students);
+    onUpdateSeating(student.id, student.row, student.column);
   }
 
   return (
     <div className={[students.length <= 0 ? "hidden" : "block"].join(" ")}>
       <h2>Students</h2>
-      <form action=""name="Students List">
+      <form name="Students List">
         <table className="student-list w-full">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Row</th>
-              <th>Column</th>
+              <th className="w-3/5">Name</th>
+              <th className="w-1/5">Row</th>
+              <th className="w-1/5">Column</th>
             </tr>
           </thead>
           <tbody>
@@ -69,9 +69,10 @@ export default function StudentList({
                   >{student.name}</button>
                 </td>
                 <td>
-                  <label htmlFor="row" className="items-center space-between flex gap-1">
+                  <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
                   <span className="text-xs sr-only">{student.name} Row</span>
                     <input name="row"
+                      id={`student-${student.id}-row`}
                       min="0"
                       max={layout.rows - 1}
                       type="number"
@@ -83,11 +84,12 @@ export default function StudentList({
                   </label>
                 </td>
                 <td>
-                  <label htmlFor="column" className="items-center space-between flex gap-1">
+                  <label htmlFor={`student-${student.id}-column`} className="items-center space-between flex gap-1">
                     <span className="text-xs sr-only">{student.name} Column</span>
                     <input name="column"
+                      id={`student-${student.id}-column`}
                       min="0"
-                      max={layout.rows - 1}
+                      max={layout.columns - 1}
                       type="number"
                       value={student.column} 
                       onChange={handleSeatChange}

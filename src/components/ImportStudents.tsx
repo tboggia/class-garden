@@ -34,7 +34,6 @@ export default function ImportStudents({
       const hasHeader = lines[0].toLowerCase().includes('name');
       
       let newClass: Class;
-      let newClassCount: number = 0;
       let importedStudents: Student[] = [];
       let importedClasses: Class[] = [];
       let classesLoop = classes;
@@ -43,12 +42,11 @@ export default function ImportStudents({
 
       const addNewClass = (name: string): Class => {
         let newClass: Class = {
-          id: classesLoop.length > 0 ? classesLoop[classesLoop.length - 1].id + newClassCount : 1,
+          id: classesLoop.length > 0 ? classesLoop[classesLoop.length - 1].id + 1 : 1,
           name: name,
         };
         importedClasses= [...importedClasses, newClass];
         classesLoop = [...classesLoop, newClass];
-        newClassCount += 1;
         return newClass;
       }
 

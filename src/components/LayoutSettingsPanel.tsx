@@ -12,6 +12,7 @@ interface Props {
   selectedClassId: number | 0;
   onUpdateLayout: (layout: LayoutSettings) => void;
   onImportStudents: (students: Student[], classes: Class[]) => void;
+  onAddStudent: (name: string) => void;
 }
 
 export default function LayoutSettingsPanel({
@@ -21,6 +22,7 @@ export default function LayoutSettingsPanel({
   selectedClassId,
   onUpdateLayout,
   onImportStudents,
+  onAddStudent,
 }: Props) {
   const handleSettingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,6 +70,11 @@ export default function LayoutSettingsPanel({
           onUpdateLayout={onUpdateLayout}
           onImportStudents={onImportStudents}
         />
+        { selectedClassId !== 0 &&
+          <p>
+            <button className="button-small" onClick={() => onAddStudent(prompt("Student name?") || "")}>Add Student</button>
+          </p>
+        }
       </form>
     </div>
   )
