@@ -1,64 +1,73 @@
-import type { LayoutSettings } from '../types/models';
+import type { 
+  LayoutSettings, 
+  Student, 
+  Class
+} from '../types/models';
+import ImportStudents from './ImportStudents';
 
 interface Props {
   layout: LayoutSettings;
+  students: Student[];
+  classes: Class[];
+  selectedClassId: number | 0;
   onUpdateLayout: (layout: LayoutSettings) => void;
+  onImportStudents: (students: Student[], classes: Class[]) => void;
 }
 
 export default function LayoutSettingsPanel({
   layout,
+  students,
+  classes,
+  selectedClassId,
   onUpdateLayout,
+  onImportStudents,
 }: Props) {
-  const handleRowsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rows = Number(e.target.value);
-    onUpdateLayout({...layout, rows});
-  }
-
-  const handleColumnsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const columns = Number(e.target.value);
-    onUpdateLayout({ ...layout, columns});
-  }
-
-  const handleTeacherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const teacher = e.target.value;
-    onUpdateLayout({ ...layout, teacher });
+  const handleSettingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    onUpdateLayout({ ...layout, [name]: value });
   }
 
   return (
     <div>
       <h2>Classroom Settings</h2>
-      <form>
-        <label>
-          Teacher:
-          <input 
-            type="text" 
-            name="teacher" 
-            value={layout.teacher}
-            onChange={handleTeacherChange}
-          />
-        </label>
-        <br />
-        <label>
-          Rows:
+      <form className="flex flex-col gap-3">
+        <label className="label-input-number">
+          Rows: 
           <input 
             type="number" 
             min={1}
             name="rows" 
             value={layout.rows}
-            onChange={handleRowsChange}
+            onChange={handleSettingChange}
           />
         </label>
-        <br />
-        <label>
-          Columns:
+        <label className="label-input-number">
+          Columns: 
           <input 
             type="number" 
             min={1}
             name="columns" 
             value={layout.columns}
-            onChange={handleColumnsChange}
+            onChange={handleSettingChange}
           />
         </label>
+        <label className="label-input-text">
+          Teacher:
+          <input
+            type="text"
+            name="teacher"
+            value={layout.teacher}
+            onChange={handleSettingChange}
+          />
+        </label>
+        <ImportStudents
+          students={students}
+          classes={classes}
+          layout={layout}
+          selectedClassId={selectedClassId}
+          onUpdateLayout={onUpdateLayout}
+          onImportStudents={onImportStudents}
+        />
       </form>
     </div>
   )

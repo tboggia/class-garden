@@ -9,19 +9,15 @@ export default function StudentDetailPanel({
   student,
   onIncrementValue,
 }: Props) {
-  if (!student) {
-    return (
-      <div>
-        <h2>Student Details</h2>
-        <p>Select a student to view details.</p>
-      </div>
-    );
-  }
-  
+  if (!student) return null;
   return (
-    <div>
+    <div 
+      className={[
+        'absolute bg-white/90 p-8 rounded-md left-[54%] top-[41%] text-center text-rose-400',
+      ].join(' ')}
+    >
       <h2>{student.name}</h2>
-      <form>
+      <form className="flex gap-2">
         <button
           type="button"
           onClick={() => onIncrementValue('spokeUpCount')}

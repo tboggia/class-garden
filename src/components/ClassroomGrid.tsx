@@ -1,13 +1,14 @@
 import type { Student, LayoutSettings } from '../types/models';
-import { 
+import {
   DndContext,
   useDraggable,
   useDroppable
- } from "@dnd-kit/core";
+} from "@dnd-kit/core";
 
 interface Props {
   layout: LayoutSettings;
   students: Student[];
+  selectedClassId: number | null;
   onSelectStudent: (id: number) => void;
   onSeatChange: (id: number, row: number, column: number) => void;
 }
@@ -15,13 +16,14 @@ interface Props {
 export default function ClassroomGrid({
   layout,
   students,
+  selectedClassId,
   onSelectStudent,
   onSeatChange
 }: Props) {
-  const {rows, columns} = layout;
+  const { rows, columns } = layout;
 
-  const getStudentAt = (row: number, col: number) => {
-    return students.find(
+  const getStudentsAt = (row: number, col: number) => {
+    return students.filter(
       (student) => student.row === row && student.column === col
     );
   };
@@ -35,7 +37,7 @@ export default function ClassroomGrid({
     const [_, row, column] = dropTarget.split("-");
     const newRow = Number(row);
     const newColumn = Number(column);
-    
+
     const seatTaken = students.some((s) => s.row === newRow && s.column === newColumn);
     if (seatTaken) return;
 
@@ -44,66 +46,71 @@ export default function ClassroomGrid({
 
 
   return (
-      <div>
-        <h2>Class Grid</h2>
-        <DndContext onDragEnd={handleDragEnd}>
-          <div 
-            style={{ 
-              display: "grid",
-              gridTemplateRows: `repeat(${rows}, 60px)`,
-              gridTemplateColumns: `repeat(${columns}, 120px)`,
-              gap: "8px",
-              marginTop: "16px"
-            }}
-          >
-            {Array.from({length: rows}).map((_, rowIndex) =>
-              Array.from({ length: columns }).map((_, colIndex) => {
-                const student = getStudentAt(rowIndex, colIndex);
+    <div className={[
+      "overflow-hidden",
+      selectedClassId === null || students.length > 0 ? "block" : "hidden"
+    ].join(" ")}>
+      <h2>Class Grid</h2>
+      <DndContext onDragEnd={handleDragEnd}>
+        <div
+          className="grid gap-2 overflow-scroll"
+          style={{
+            gridTemplateRows: `repeat(${rows}, 60px)`,
+            gridTemplateColumns: `repeat(${columns}, 120px)`,
+          }}
+        >
+          {Array.from({ length: rows }).map((_, rowIndex) =>
+            Array.from({ length: columns }).map((_, colIndex) => {
+              const students = getStudentsAt(rowIndex, colIndex);
+              return (
+                <SeatCell
+                  key={`${rowIndex}-${colIndex}`}
+                  row={rowIndex}
+                  column={colIndex}
+                  students={students}
+                  onSelectStudent={onSelectStudent}
+                />
+              )
+            })
+          )}
+        </div>
+      </DndContext>
 
-                return (
-                  <SeatCell 
-                    key={`${rowIndex}-${colIndex}`}
-                    row={rowIndex}
-                    column={colIndex}
-                    student={student}
-                    onSelectStudent={onSelectStudent}
-                  />
-                )
-              })
-            )}
-          </div>
-        </DndContext>
-
-      </div>
+    </div>
   )
 }
 
 interface SeatCellProps {
   row: number;
   column: number;
-  student: Student | undefined;
+  students: Student[];
   onSelectStudent: (id: number) => void;
 }
 
-function SeatCell({ row, column, student, onSelectStudent }: SeatCellProps) {
-
-  const { setNodeRef: setDropRef, isOver} = useDroppable({
+function SeatCell({ row, column, students, onSelectStudent }: SeatCellProps) {
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `seat-${row}-${column}`
   });
-  return ( 
+  return (
     <div
+      className="seat-cell"
       ref={setDropRef}
       style={{
         border: "1px solid #ccc",
         borderRadius: "6px",
         backgroundColor: isOver ? "lightblue"
-          : student 
+          : students.length > 0
             ? "#bbb"
             : "#ddd",
+        gridTemplateColumns: students.length > 1 ? "repeat(auto-fit, minmax(50px, 1fr))" : "none",
+        display: students.length > 1 ? "grid" : "block",
+
       }}
     >
-      {student ? (
-        <DraggableStudent student={student} onSelectStudent={onSelectStudent} />
+      {students.length > 0 ? (
+        students.map(student => (
+          <DraggableStudent key={student.id} student={student} onSelectStudent={onSelectStudent} />
+        ))
       ) : ""}
     </div>
   );
@@ -137,13 +144,13 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
         position: 'relative',
         backgroundColor: isDragging ? "darkblue" : "blue",
         transition: "transform 50ms ease-in-out",
-        transform: transform 
+        transform: transform
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
       }}
     >
       <span
-        style={{ 
+        style={{
           gridColumn: '2',
           gridRow: '1',
           display: 'flex',
@@ -153,7 +160,7 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
           userSelect: 'none',
           lineHeight: '0',
           height: '100%',
-         }}
+        }}
         {...listeners}
         {...attributes}
         aria-label="Drag Element"

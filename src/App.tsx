@@ -52,67 +52,79 @@ function App() {
 
   return (
     <>
-    <div>
-      <h1>{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
-      <LayoutSettingsPanel
-        layout={layout}
-        onUpdateLayout={setLayout}
-      />
-
-      <ClassSelector
-        classes={classes}
-        selectedClassId={selectedClassId}
-        onSelectClass={(id) => {
-          setSelectedStudentId(null);
-          setSelectedClassId(id);
-        }}
-        onAddClass={(name) => {
-          const newClass: Class = {
-            id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
-            name
-          };
-          setClasses([...classes, newClass]);
-        }}
-      />
-      <StudentList
-        students={students.filter((student) => selectedClassId === 0 || student.classId === selectedClassId)}
-        selectedStudentId={selectedStudentId}
-        classes={classes}
-        selectedClassId={selectedClassId}
-        layout={layout}
-        onSelectStudent={setSelectedStudentId}
-        onUpdateSeating={setStudents}
-        onImportStudents={(importedStudents, importedClasses) => {
-          setStudents([...students, ...importedStudents]);
-          setClasses([...classes, ...importedClasses]);
-        }}
-      />
-      <StudentDetailPanel
-        student={students.find((student) => student.id === selectedStudentId) || null}
-        onIncrementValue={(type) => {
-          if (selectedStudentId === null) return;
-          setStudents((prevStudents) =>
-            prevStudents.map((student) =>
-              student.id === selectedStudentId
-                ? { ...student, [type]: student[type] + 1 }
-                : student
-            )
-          );
-        }}
-      />
-      <ClassroomGrid
-        layout={layout}
-        students={students.filter((student) => selectedClassId === null || student.classId === selectedClassId)}
-        onSelectStudent={setSelectedStudentId}
-        onSeatChange={(id, row, column) => {
-          setStudents(
-            students.map((student) =>
-              student.id === id ? { ...student, row, column } : student
-            )
-          )
-        }}
-      />
-    </div>
+      <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-[1400px] m-6">
+        <h1 className="col-span-full">{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
+        <div id="sidebar" className="flex flex-col gap-6">
+          <ClassSelector
+            classes={classes}
+            selectedClassId={selectedClassId}
+            onSelectClass={(id) => {
+              setSelectedStudentId(null);
+              setSelectedClassId(id);
+            }}
+            onEditClass={(editedClass) => {
+              setClasses(classes =>
+                classes.map((cls) =>
+                  cls.id === editedClass.id ? editedClass : cls
+                )
+              );
+            }}
+            onAddClass={(name) => {
+              const newClass: Class = {
+                id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
+                name
+              };
+              setClasses([...classes, newClass]);
+            }}
+          />
+          <StudentList
+            students={students.filter((student) => selectedClassId === 0 || student.classId === selectedClassId)}
+            selectedStudentId={selectedStudentId}
+            layout={layout}
+            onSelectStudent={setSelectedStudentId}
+            onUpdateSeating={setStudents}
+          />
+          <LayoutSettingsPanel
+            students={students}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            layout={layout}
+            onUpdateLayout={setLayout}
+            onImportStudents={(importedStudents, importedClasses) => {
+              setStudents([...students, ...importedStudents]);
+              setClasses([...classes, ...importedClasses]);
+            }}
+          />
+        </div>
+        <div id="classroom-grid" className="flex flex-col gap-6 w-full overflow-hidden">
+          <ClassroomGrid
+            layout={layout}
+            students={students.filter((student) => selectedClassId === null || student.classId === selectedClassId)}
+            selectedClassId={selectedClassId}
+            onSelectStudent={setSelectedStudentId}
+            onSeatChange={(id, row, column) => {
+              setStudents(
+                students.map((student) =>
+                  student.id === id ? { ...student, row, column } : student
+                )
+              )
+            }}
+          />
+          <StudentDetailPanel
+            student={students.find((student) => student.id === selectedStudentId) || null}
+            onIncrementValue={(type) => {
+              if (selectedStudentId === null) return;
+              setStudents((prevStudents) =>
+                prevStudents.map((student) =>
+                  student.id === selectedStudentId
+                    ? { ...student, [type]: student[type] + 1 }
+                    : student
+                )
+              );
+            }}
+          />
+        </div>
+      </div>
     </>
   )
 }
