@@ -148,19 +148,13 @@ function SeatCell({ row, column, students, onSelectStudent }: SeatCellProps) {
     <div
       className={[
         students.length > 0 ? "seat-cell-occupied" : '',
-        "seat-cell"
+        "seat-cell rounded-md border border-gray-400 transition-colors duration-750 ease-in-out",
+        isOver ? "bg-teal-100" : students.length > 0 ? "bg-rose-100" : "bg-gray-200",
+        students.length > 1 ? 'grid' : 'block',
       ].join(" ")}
       ref={setDropRef}
       style={{
-        border: "1px solid #ccc",
-        borderRadius: "6px",
-        backgroundColor: isOver ? "lightblue"
-          : students.length > 0
-            ? "#bbb"
-            : "#ddd",
         gridTemplateColumns: students.length > 1 ? "repeat(auto-fit, minmax(50px, 1fr))" : "none",
-        display: students.length > 1 ? "grid" : "block",
-
       }}
     >
       {students.length > 0 ? (
@@ -187,19 +181,13 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
     <div
       ref={setNodeRef}
       onClick={() => onSelectStudent(student.id)}
+      className={[
+        "grid grid-cols-[1fr_1rem] grid-rows-[1rem_1fr]",
+        "rounded-md items-center justify-center h-full cursor-pointer relative text-center",
+        isDragging ? "z-10 bg-teal-950 text-rose-100" : "z-auto bg-teal-700 text-rose-100",
+      ].join(" ")}
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1rem",
-        gridTemplateRows: "1rem 1fr",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "6px",
-        height: "100%",
-        cursor: "pointer",
-        zIndex: isDragging ? "9999" : "auto",
-        position: 'relative',
-        backgroundColor: isDragging ? "darkblue" : "blue",
-        transition: "transform 50ms ease-in-out",
+        transition: "transform 25ms ease-in-out, background-color 100ms ease-in-out",
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
