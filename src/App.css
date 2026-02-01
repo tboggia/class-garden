@@ -1,14 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
 @import "tailwindcss";
+
+body {
+  @apply bg-teal-950;
+}
 
 #root {
   @apply w-full min-h-screen flex justify-center;
   @apply text-base text-teal-100;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Poppins', 'Roboto', sans-serif;
   font-weight: 400;
 
   color-scheme: light dark;
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -29,9 +32,12 @@ h1 {
 h2 {
   @apply text-3xl mb-4;
 }
+h3 {
+  @apply text-xl mb-2;
+}
 
 button, .button, ::file-selector-button {
-  @apply rounded-md border border-transparent text-base font-semibold bg-teal-950 text-teal-100;
+  @apply rounded-md border border-transparent text-base font-semibold bg-rose-950 text-rose-100;
   padding: 0.6em 1.2em;
   font-family: inherit;
   cursor: pointer;

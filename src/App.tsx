@@ -14,6 +14,7 @@ function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<number | 0>(0);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [layout, setLayout] = useState<LayoutSettings>({
     rows: 1,
     columns: 1,
@@ -65,7 +66,16 @@ function App() {
   return (
     <>
       <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-[1400px] m-6">
-        <h1 className="col-span-full">{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
+        <div className="col-span-full flex justify-between items-center">
+          <h1>{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="button-small"
+            aria-label="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
         <div id="sidebar" className="flex flex-col gap-6">
           <ClassSelector
             classes={classes}
@@ -99,94 +109,6 @@ function App() {
               )
             }}
           />
-          <LayoutSettingsPanel
-            students={students}
-            classes={classes}
-            selectedClassId={selectedClassId}
-            layout={layout}
-            onUpdateLayout={setLayout}
-            onImportStudents={(importedStudents, importedClasses) => {
-              setStudents([...students, ...importedStudents]);
-              setClasses([...classes, ...importedClasses]);
-            }}
-            onAddStudent={(name) => {
-              if (!selectedClassId) return;
-              const newStudent: Student = {
-                id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
-                name,
-                classId: selectedClassId,
-                row: 0,
-                column: 0,
-                spokeUpCount: 0,
-                disruptiveCount: 0
-              };
-              setStudents([...students, newStudent]);
-            }}
-          />
-          <div>
-            <h2>Data Management</h2>
-            <div className="flex flex-col gap-2 mb-6">
-              <select
-                name="backup selection"
-                value={selectedBackupKey}
-                onChange={(e) => setSelectedBackupKey(e.target.value)}
-              >
-                <option value="" disabled>Select Backup</option>
-                {Object.keys(localStorage)
-                  .filter(key => key.startsWith('class-garden-data-'))
-                  .sort()
-                  .reverse()
-                  .map(key => (
-                    <option key={key} value={key}>
-                      {key.replace('class-garden-data-', '')}
-                    </option>
-                  ))
-                }
-              </select>
-              <div>
-                <button
-                  className="button-small"
-                  disabled={!selectedBackupKey}
-                  onClick={() => {
-                  if (!selectedBackupKey) return;
-                  const backupData = localStorage.getItem(selectedBackupKey);
-                  if (backupData) {
-                    try {
-                    const parsed = JSON.parse(backupData);
-                    setClasses(parsed.classes || []);
-                    setStudents(parsed.students || []);
-                    setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
-                    setSelectedClassId(0);
-                    setSelectedStudentId(null);
-                    alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
-                    setSelectedBackupKey('');
-                    } catch (error) {
-                    alert("Failed to restore backup: Invalid backup data.");
-                      setSelectedBackupKey('');
-                    }
-                  }
-                  }}
-                >
-                  Restore Backup
-                </button>
-              </div>
-            </div>
-            <button
-              className="button-small button-danger"
-              onClick={() => {
-                if (window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
-                  setClasses([]);
-                  setStudents([]);
-                  setSelectedClassId(0);
-                  setSelectedStudentId(null);
-                  setLayout({ rows: 1, columns: 1, teacher: "" });
-                  localStorage.removeItem("class-garden-data");
-                }
-              }}
-            >
-              Delete all data
-            </button>
-          </div>
         </div>
         <div id="classroom-grid" className="flex flex-col gap-6 w-full overflow-hidden">
           <ClassroomGrid
@@ -225,6 +147,110 @@ function App() {
           />
         </div>
       </div>
+
+      {showSettings && (
+        <div className="fixed inset-0 bg-teal-950/95 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
+          <div className="bg-white text-teal-950 rounded-lg p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="!mb-0">Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="button-small">×</button>
+            </div>
+            
+            <div className="mb-3">
+              <LayoutSettingsPanel
+                students={students}
+                classes={classes}
+                selectedClassId={selectedClassId}
+                layout={layout}
+                onUpdateLayout={setLayout}
+                onImportStudents={(importedStudents, importedClasses) => {
+                  setStudents([...students, ...importedStudents]);
+                  setClasses([...classes, ...importedClasses]);
+                }}
+                onAddStudent={(name) => {
+                  if (!selectedClassId) return;
+                  const newStudent: Student = {
+                    id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
+                    name,
+                    classId: selectedClassId,
+                    row: 0,
+                    column: 0,
+                    spokeUpCount: 0,
+                    disruptiveCount: 0
+                  };
+                  setStudents([...students, newStudent]);
+                }}
+              />
+            </div>
+
+            <div>
+              <h3 className="mb-3">Data Management</h3>
+              <div className="flex flex-col gap-2 mb-6">
+                <select
+                  name="backup selection"
+                  value={selectedBackupKey}
+                  onChange={(e) => setSelectedBackupKey(e.target.value)}
+                >
+                  <option value="" disabled>Select Backup</option>
+                  {Object.keys(localStorage)
+                    .filter(key => key.startsWith('class-garden-data-'))
+                    .sort()
+                    .reverse()
+                    .map(key => (
+                      <option key={key} value={key}>
+                        {key.replace('class-garden-data-', '')}
+                      </option>
+                    ))
+                  }
+                </select>
+                <div>
+                  <button
+                    className="button-small"
+                    disabled={!selectedBackupKey}
+                    onClick={() => {
+                    if (!selectedBackupKey) return;
+                    const backupData = localStorage.getItem(selectedBackupKey);
+                    if (backupData) {
+                      try {
+                      const parsed = JSON.parse(backupData);
+                      setClasses(parsed.classes || []);
+                      setStudents(parsed.students || []);
+                      setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
+                      setSelectedClassId(0);
+                      setSelectedStudentId(null);
+                      alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
+                      setSelectedBackupKey('');
+                      } catch (error) {
+                      alert("Failed to restore backup: Invalid backup data.");
+                        setSelectedBackupKey('');
+                      }
+                    }
+                    }}
+                  >
+                    Restore Backup
+                  </button>
+                </div>
+              </div>
+              <button
+                className="button-small button-danger"
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
+                    setClasses([]);
+                    setStudents([]);
+                    setSelectedClassId(0);
+                    setSelectedStudentId(null);
+                    setLayout({ rows: 1, columns: 1, teacher: "" });
+                    localStorage.removeItem("class-garden-data");
+                    setShowSettings(false);
+                  }
+                }}
+              >
+                Delete all data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

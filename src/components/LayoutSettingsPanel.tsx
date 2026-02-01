@@ -31,7 +31,7 @@ export default function LayoutSettingsPanel({
 
   return (
     <div>
-      <h2>Classroom Settings</h2>
+      <h3>Classroom Settings</h3>
       <form className="flex flex-col gap-3">
         <label className="label-input-number">
           Rows: 

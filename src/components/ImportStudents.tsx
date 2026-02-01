@@ -124,9 +124,11 @@ export default function ImportStudents({
   }
 
   return (
-    <label htmlFor="csv-import" className="block max-w-32 flex flex-col gap-2">
-      Import Students:
-      <input id="csv-import" type="file" accept=".csv" onChange={(e) => handleCSVImport(e)} />
-    </label>
+    <div>
+      <h3 className="">Import Students:</h3>
+      <label htmlFor="csv-import" className="block max-w-32 flex flex-col gap-2">
+        <input id="csv-import" type="file" accept=".csv" onChange={(e) => handleCSVImport(e)} />
+      </label>
+    </div>
   )
 }
