@@ -67,7 +67,7 @@ function App() {
     <>
       <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-350 m-6">
         <div className="col-span-full flex justify-between items-center">
-          <h1>{layout.teacher ? layout.teacher + "'s " : ""}Class Garden</h1>
+          <h1>{layout.teacher ? layout.teacher + (layout.teacher[layout.teacher.length - 1] === "s" ? "' " : "'s ") : ""}Class Garden</h1>
           <button
             onClick={() => setShowSettings(true)}
             className="button-small"
@@ -80,14 +80,24 @@ function App() {
         {students.length === 0 && (
           <div className="welcome-screen col-span-full w-1/2 mx-auto mt-6 flex flex-col gap-4">
             <div className="bg-teal-800 text-teal-100 rounded-md p-4">
-              <p className="mb-2">Welcome to Class Garden! To get started, please create a class and add some students.</p>
-              <p>You can add students manually or import them from a CSV file in the settings.</p>
+              <p className="mb-2">Welcome to Class Garden! To get started:</p>
+              <ol className="list-decimal list-inside mb-3 ml-3">
+                <li>Write your teacher name</li>
+                <li>Define your classroom desk grid</li>
+                <li>Add class periods<sup>*</sup></li>
+                <li>Import students from a CSV file with headings: Name, Class<sup>*</sup>, Row<sup>*</sup>, and Column<sup>*</sup></li>
+              </ol>
+              <p>You can find these settings using the gear icon on the top-right of the screen.</p>
+              <p className="text-sm"><sup>*</sup> Optional fields</p>
             </div>
             <LayoutSettingsPanel
+              layout={layout}
               students={students}
               classes={classes}
               selectedClassId={selectedClassId}
-              layout={layout}
+              setSelectedClassId={setSelectedClassId}
+              setSelectedStudentId={setSelectedStudentId}
+              setClasses={setClasses}
               onUpdateLayout={setLayout}
               onImportStudents={(importedStudents, importedClasses) => {
                 setStudents([...students, ...importedStudents]);
@@ -107,25 +117,7 @@ function App() {
                 setStudents([...students, newStudent]);
               }}
             />
-            <ClassSelector
-              classes={classes}
-              selectedClassId={selectedClassId}
-              onSelectClass={(id) => {
-                if (id !== selectedClassId) {
-                  setSelectedClassId(id);
-                } else {
-                  setSelectedClassId(0);
-                }
-                setSelectedStudentId(null);
-              }}
-              onAddClass={(name) => {
-                const newClass: Class = {
-                  id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
-                  name
-                };
-                setClasses([...classes, newClass]);
-              }}
-            />
+            
           </div>
         )}
 
@@ -136,6 +128,7 @@ function App() {
           <ClassSelector
             classes={classes}
             selectedClassId={selectedClassId}
+            context='sidebar'
             onSelectClass={(id) => {
               if (id !== selectedClassId) {
                 setSelectedClassId(id);
@@ -207,18 +200,20 @@ function App() {
 
       {showSettings && (
         <div className="fixed inset-0 bg-teal-950/95 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
-          <div className="bg-white text-teal-950 rounded-lg p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white text-teal-950 rounded-lg p-6 min-w-1/3 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="mb-0!">Settings</h2>
               <button onClick={() => setShowSettings(false)} className="button-small">×</button>
             </div>
-            
             <div className="mb-3">
               <LayoutSettingsPanel
+                layout={layout}
                 students={students}
                 classes={classes}
                 selectedClassId={selectedClassId}
-                layout={layout}
+                setSelectedClassId={setSelectedClassId}
+                setSelectedStudentId={setSelectedStudentId}
+                setClasses={setClasses}
                 onUpdateLayout={setLayout}
                 onImportStudents={(importedStudents, importedClasses) => {
                   setStudents([...students, ...importedStudents]);

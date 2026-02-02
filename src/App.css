@@ -75,7 +75,9 @@ button[disabled] {
 input[type="text"], input[type="number"] {
   @apply border rounded-md p-1 text-xs;
 }
-
+label {
+  @apply font-medium;
+}
 label.label-input-number,
 label.label-input-text {
   @apply flex justify-between;

@@ -3,6 +3,7 @@ import type {
   Student, 
   Class
 } from '../types/models';
+import ClassSelector from './ClassSelector';
 import ImportStudents from './ImportStudents';
 
 interface Props {
@@ -10,6 +11,9 @@ interface Props {
   students: Student[] | [];
   classes: Class[] | [];
   selectedClassId: number | 0;
+  setSelectedClassId: (id: number | 0) => void;
+  setSelectedStudentId: (id: number | null) => void;
+  setClasses: (classes: Class[]) => void;
   onUpdateLayout: (layout: LayoutSettings) => void;
   onImportStudents: (students: Student[], classes: Class[]) => void;
   onAddStudent: (name: string) => void;
@@ -20,6 +24,9 @@ export default function LayoutSettingsPanel({
   students,
   classes,
   selectedClassId,
+  setSelectedClassId,
+  setSelectedStudentId,
+  setClasses,
   onUpdateLayout,
   onImportStudents,
   onAddStudent,
@@ -33,6 +40,15 @@ export default function LayoutSettingsPanel({
     <div>
       <h3>Classroom Settings</h3>
       <form className="flex flex-col gap-4">
+        <label className="label-input-text">
+          Teacher:
+          <input
+            type="text"
+            name="teacher"
+            value={layout.teacher}
+            onChange={handleSettingChange}
+          />
+        </label>
         <label className="label-input-number">
           Rows: 
           <input 
@@ -53,15 +69,26 @@ export default function LayoutSettingsPanel({
             onChange={handleSettingChange}
           />
         </label>
-        <label className="label-input-text">
-          Teacher:
-          <input
-            type="text"
-            name="teacher"
-            value={layout.teacher}
-            onChange={handleSettingChange}
-          />
-        </label>
+        <ClassSelector
+          classes={classes}
+          selectedClassId={selectedClassId}
+          context='settings'
+          onSelectClass={(id) => {
+            if (id !== selectedClassId) {
+              setSelectedClassId(id);
+            } else {
+              setSelectedClassId(0);
+            }
+            setSelectedStudentId(null);
+          }}
+          onAddClass={(name) => {
+            const newClass: Class = {
+              id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
+              name
+            };
+            setClasses([...classes, newClass]);
+          }}
+        />
         <ImportStudents
           students={students}
           classes={classes}
