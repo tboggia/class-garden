@@ -108,19 +108,24 @@ export default function ClassroomGrid({
           }}
           onClick={(e) => {
             const targetEl = e.target as HTMLElement;
+            
+            console.log(e.target);
             if (!targetEl.closest('.seat-cell-occupied')) {
+              console.log("not an occupied cell");
+              
               onSelectStudent(0);
             }
           }}
         >
           {Array.from({ length: rows }).map((_, rowIndex) =>
             Array.from({ length: columns }).map((_, colIndex) => {
-              const students = getStudentsAt(rowIndex, colIndex);
+              const studentsInSeat = getStudentsAt(rowIndex, colIndex);
               return (
                 <SeatCell
                   key={`${rowIndex}-${colIndex}`}
                   row={rowIndex}
                   column={colIndex}
+                  studentsInSeat={studentsInSeat}
                   students={students}
                   onSelectStudent={onSelectStudent}
                 />
@@ -137,30 +142,31 @@ export default function ClassroomGrid({
 interface SeatCellProps {
   row: number;
   column: number;
+  studentsInSeat: Student[];
   students: Student[];
   onSelectStudent: (id: number) => void;
 }
 
-function SeatCell({ row, column, students, onSelectStudent }: SeatCellProps) {
+function SeatCell({ row, column, studentsInSeat, students, onSelectStudent }: SeatCellProps) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `seat-${row}-${column}`
   });
   return (
     <div
       className={[
-        students.length > 0 ? "seat-cell-occupied" : '',
+        studentsInSeat.length > 0 ? "seat-cell-occupied" : '',
         "seat-cell rounded-md border border-gray-400 transition-colors duration-750 ease-in-out",
         isOver ? "bg-teal-100" : students.length > 0 ? "bg-rose-100" : "bg-gray-200",
-        students.length > 1 ? 'grid' : 'block',
+        studentsInSeat.length > 1 ? 'grid' : 'block',
       ].join(" ")}
       ref={setDropRef}
       style={{
-        gridTemplateColumns: students.length > 1 ? "repeat(auto-fit, minmax(50px, 1fr))" : "none",
+        gridTemplateColumns: studentsInSeat.length > 1 ? "repeat(auto-fit, minmax(50px, 1fr))" : "none",
       }}
     >
-      {students.length > 0 ? (
-        students.map(student => (
-          <DraggableStudent key={student.id} student={student} onSelectStudent={onSelectStudent} />
+      {studentsInSeat.length > 0 ? (
+        studentsInSeat.map(student => (
+          <DraggableStudent key={student.id} student={student} onSelectStudent={onSelectStudent} students={students} />
         ))
       ) : ""}
     </div>
@@ -171,12 +177,32 @@ function SeatCell({ row, column, students, onSelectStudent }: SeatCellProps) {
 interface DraggableStudentProps {
   student: Student;
   onSelectStudent: (id: number) => void;
+  students: Student[];
 }
 
-function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
+function DraggableStudent({ student, onSelectStudent, students }: DraggableStudentProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: student ? student.id : ''
   })
+
+  const getSpokeUpColor = () => {
+    if (!students) return { background: 'rgb(4, 47, 46)', color: 'white' };
+    
+    const minSpeakUp = Math.min(...students.map(s => s.spokeUpCount));
+    const maxSpeakUp = Math.max(...students.map(s => s.spokeUpCount));
+
+    const normalized = (maxSpeakUp - minSpeakUp) ? (Number(student.spokeUpCount) - minSpeakUp) / (maxSpeakUp - minSpeakUp) : 1;
+    
+    const hue = 160; // teal hue
+    const saturation = 20 + normalized * 90; // 30% to 90%
+    const lightness = 60 - normalized * 50; // 70% to 40%
+    const color: { background: string; color: string } = { 
+      background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+      color: lightness > 50 ? 'black' : 'white'
+    };
+    console.log(color);
+    return color;
+  }
 
   return (
     <div
@@ -185,13 +211,15 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
       className={[
         "grid grid-cols-[1fr_1rem] grid-rows-[1rem_1fr] border border-rose-100",
         "rounded-md items-center justify-center h-full cursor-pointer relative text-center touch-none",
-        isDragging ? "z-10 bg-teal-950 text-rose-100" : "z-auto bg-teal-700 text-rose-100",
+        isDragging ? "z-10" : "z-auto",
       ].join(" ")}
       style={{
         transition: "transform 25ms ease-in-out, background-color 100ms ease-in-out",
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
+        backgroundColor: getSpokeUpColor()['background'],
+        color: getSpokeUpColor()['color'],
       }}
     >
       <span
@@ -202,7 +230,7 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
         {...attributes}
         aria-label="Drag Element"
       >
-        ❖
+          ❖
       </span>
       <p
         className={[
