@@ -51,7 +51,7 @@ export default function ImportStudents({
       }
 
       if (hasHeader) {
-        const headers = lines[0].split(',').map(h => h.trim())
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
         const rows = lines.slice(1);
 
         importedStudents = rows.map((line, key) => {
