@@ -22,11 +22,11 @@ export default function ClassSelector({
         <ul className="mb-6">
           {classes.sort((a, b) => a.name.localeCompare(b.name)).map((cls) => (
             <li 
+              className={[
+                "cursor-pointer",
+                cls.id == selectedClassId ? "font-bold" : "font-normal",
+              ].join(" ")}
               key={cls.id}
-              style={{ 
-                fontWeight: cls.id == selectedClassId ? "bold" : "normal",
-                cursor: "pointer"
-              }}
               onClick={() => onSelectClass(cls.id)}
             >
               <span data-id={cls.id.toString()} className={`class-${cls.id.toString()}`}>{cls.name}</span>

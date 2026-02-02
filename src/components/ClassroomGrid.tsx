@@ -184,7 +184,7 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
       onClick={() => onSelectStudent(student.id)}
       className={[
         "grid grid-cols-[1fr_1rem] grid-rows-[1rem_1fr] border border-rose-100",
-        "rounded-md items-center justify-center h-full cursor-pointer relative text-center",
+        "rounded-md items-center justify-center h-full cursor-pointer relative text-center touch-none",
         isDragging ? "z-10 bg-teal-950 text-rose-100" : "z-auto bg-teal-700 text-rose-100",
       ].join(" ")}
       style={{
@@ -192,21 +192,12 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px) scale(0.97)`
           : "scale(1)",
-        touchAction: "none",
       }}
     >
       <span
-        style={{
-          gridColumn: '2',
-          gridRow: '1',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'grab',
-          userSelect: 'none',
-          lineHeight: '0',
-          height: '100%',
-        }}
+        className={[
+          "flex items-center justify-center cursor-grab select-none leading-0 h-full col-start-2 row-start-1"
+        ].join(" ")}
         {...listeners}
         {...attributes}
         aria-label="Drag Element"
@@ -215,9 +206,8 @@ function DraggableStudent({ student, onSelectStudent }: DraggableStudentProps) {
       </span>
       <p
         className={[
-          "overflow-wrap leading-0"
+          "overflow-wrap leading-0 col-span-full row-span-full"
         ].join(" ")} 
-        style={{ gridColumn: '1/-1', gridRow: '1/-1' }}
       >{student.name}</p>
     </div>
   )

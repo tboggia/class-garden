@@ -62,9 +62,6 @@ export default function StudentList({
                       "button-small h-min",
                       student.id == selectedStudentId ? "font-bold" : "font-normal",
                     ].join(" ")}
-                    style={{
-                      fontWeight: student.id == selectedStudentId ? "bold" : "normal",
-                    }}
                     onClick={() => onSelectStudent(student.id)}
                   >{student.name}</button>
                 </td>
