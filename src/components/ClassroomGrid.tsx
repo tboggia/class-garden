@@ -35,7 +35,7 @@ export default function ClassroomGrid({
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const studentId = event.active.id;
+    const studentId = event.active.id as number;
     const dropTarget: string | 0 = event.over?.id as string;
 
     if (!dropTarget) return;
@@ -44,13 +44,21 @@ export default function ClassroomGrid({
     const newRow = Number(row);
     const newColumn = Number(column);
 
-    const seatTaken = students.some((s) => {
-      const assignment = s.classAssignments[selectedClassId ?? 0];
-      return assignment && assignment.row === newRow && assignment.column === newColumn;
+    const classId = selectedClassId ?? 0;
+    const occupant = students.find((s) => {
+      const assignment = s.classAssignments[classId];
+      return assignment && assignment.row === newRow && assignment.column === newColumn && s.id !== studentId;
     });
-    if (seatTaken) return;
 
-    onSeatChange(studentId as number, newRow, newColumn);
+    if (occupant) {
+      const draggedStudent = students.find(s => s.id === studentId);
+      const draggedAssignment = draggedStudent?.classAssignments[classId];
+      if (draggedAssignment) {
+        onSeatChange(occupant.id, draggedAssignment.row, draggedAssignment.column);
+      }
+    }
+
+    onSeatChange(studentId, newRow, newColumn);
   }
 
   const editClassName = () => {
