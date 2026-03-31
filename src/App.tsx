@@ -176,7 +176,6 @@ function App() {
         {students.length > 0 && (
           <div id="classroom-grid" className={[
             "flex flex-col gap-6 w-full overflow-hidden",
-            selectedClassId ? '' : 'hidden'
           ].join(" ")}>
             <ClassroomGrid
               layout={layout}
@@ -201,28 +200,31 @@ function App() {
                 )
               }}
             />
-            <StudentDetailPanel
-              student={students.find((student) => student.id === selectedStudentId) || null}
-              classes={classes}
-              selectedClassId={selectedClassId}
-              onUpdateAssignment={(studentId, classId, field, value) => {
-                setStudents((prevStudents) =>
-                  prevStudents.map((student) => {
-                    if (student.id !== studentId) return student;
-                    const assignment = student.classAssignments[classId];
-                    if (!assignment) return student;
-                    return {
-                      ...student,
-                      classAssignments: {
-                        ...student.classAssignments,
-                        [classId]: { ...assignment, [field]: value },
-                      },
-                    };
-                  })
-                );
-              }}
-            />
           </div>
+        )}
+        {(
+          <StudentDetailPanel
+            student={students.find((student) => student.id === selectedStudentId) || null}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            onClose={() => setSelectedStudentId(null)}
+            onUpdateAssignment={(studentId, classId, field, value) => {
+              setStudents((prevStudents) =>
+                prevStudents.map((student) => {
+                  if (student.id !== studentId) return student;
+                  const assignment = student.classAssignments[classId];
+                  if (!assignment) return student;
+                  return {
+                    ...student,
+                    classAssignments: {
+                      ...student.classAssignments,
+                      [classId]: { ...assignment, [field]: value },
+                    },
+                  };
+                })
+              );
+            }}
+          />
         )}
       </div>
 

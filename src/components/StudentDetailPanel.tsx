@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Student, Class } from '../types/models';
 
 interface Props {
@@ -5,6 +6,7 @@ interface Props {
   classes: Class[];
   selectedClassId: number;
   onUpdateAssignment: (studentId: number, classId: number, field: string, value: number) => void;
+  onClose: () => void;
 }
 
 export default function StudentDetailPanel({
@@ -12,7 +14,21 @@ export default function StudentDetailPanel({
   classes,
   selectedClassId,
   onUpdateAssignment,
+  onClose,
 }: Props) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!student) return;
+    const handleClick = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    window.addEventListener('mousedown', handleClick);
+    return () => window.removeEventListener('mousedown', handleClick);
+  }, [student, onClose]);
+
   if (!student) return null;
 
   const activeAssignment = selectedClassId !== 0 ? student.classAssignments[selectedClassId] : null;
@@ -20,9 +36,10 @@ export default function StudentDetailPanel({
 
   return (
     <div
+      ref={panelRef}
       data-is-tooltip
       className={[
-        'absolute bg-white/90 p-8 rounded-md left-[54%] top-[41%] text-center text-rose-400',
+        "absolute bg-white/90 p-8 rounded-md text-center text-rose-400 w-125 inset-0 h-min m-auto"
       ].join(' ')}
     >
       <h2>{student.name}</h2>
@@ -33,13 +50,13 @@ export default function StudentDetailPanel({
             type="button"
             onClick={() => onUpdateAssignment(student.id, selectedClassId, 'spokeUpCount', activeAssignment.spokeUpCount + 1)}
           >
-            👍 {activeAssignment.spokeUpCount}
+            📣 {activeAssignment.spokeUpCount}
           </button>
           <button
             type="button"
             onClick={() => onUpdateAssignment(student.id, selectedClassId, 'disruptiveCount', activeAssignment.disruptiveCount + 1)}
           >
-            👎 {activeAssignment.disruptiveCount}
+            🚫 {activeAssignment.disruptiveCount}
           </button>
         </form>
       )}
@@ -51,8 +68,8 @@ export default function StudentDetailPanel({
               <th>Class</th>
               <th>Row</th>
               <th>Col</th>
-              <th>👍</th>
-              <th>👎</th>
+              <th>📣</th>
+              <th>🚫</th>
             </tr>
           </thead>
           <tbody>

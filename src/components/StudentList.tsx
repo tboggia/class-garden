@@ -22,8 +22,8 @@ export default function StudentList({
     const student = students.find(s => s.id === Number(e.target.dataset.studentId));
     if (!student) return;
 
-    const assignment = student.classAssignments[selectedClassId];
-    if (!assignment) return;
+    const classAssignments = student.classAssignments[selectedClassId];
+    if (!classAssignments) return;
 
     const field = e.target.name as 'row' | 'column';
     const newValue = Number(e.target.value);
@@ -34,9 +34,9 @@ export default function StudentList({
       if (!other) return false;
 
       if (field === 'row') {
-        return other.column === assignment.column && other.row === newValue;
+        return other.column === classAssignments.column && other.row === newValue;
       } else {
-        return other.row === assignment.row && other.column === newValue;
+        return other.row === classAssignments.row && other.column === newValue;
       }
     });
     if (sameCell) {
@@ -44,8 +44,8 @@ export default function StudentList({
       return;
     }
 
-    const newRow = field === 'row' ? newValue : assignment.row;
-    const newColumn = field === 'column' ? newValue : assignment.column;
+    const newRow = field === 'row' ? newValue : classAssignments.row;
+    const newColumn = field === 'column' ? newValue : classAssignments.column;
     e.target.dataset.previousValue = e.target.value;
     onUpdateSeating(student.id, newRow, newColumn);
   }
@@ -54,68 +54,61 @@ export default function StudentList({
     <div className={[students.length <= 0 ? "hidden" : "block"].join(" ")}>
       <h2>Students</h2>
       <form name="Students List">
-        <table className="student-list w-full">
-          <thead>
-            <tr>
-              <th className={selectedClassId === 0 ? "w-full" : "w-3/5"}>Name</th>
-              {selectedClassId !== 0 && <th className="w-1/5">Row</th>}
-              {selectedClassId !== 0 && <th className="w-1/5">Column</th>}
-            </tr>
-          </thead>
-          <tbody>
+        <div className="student-list w-full" id="student-list-wrapper">
+          <ul className={[
+              "list-none ml-0 gap-4 flex ",
+              selectedClassId ? "flex-col" : "flex-wrap",
+            ].join(" ")}>
             {students.sort((a, b) => a.name.localeCompare(b.name)).map((student) => {
-              const assignment = student.classAssignments[selectedClassId];
+              const classAssignments = student.classAssignments[selectedClassId];
               return (
-                <tr className="student-list--item" key={student.id}>
-                  <td>
+                <li className="student-list-item flex gap-2 justify-between" key={student.id}>
                     <button
                       type="button"
                       className={[
                         "button-small h-min",
+                        "",
                         student.id == selectedStudentId ? "font-bold" : "font-normal",
                       ].join(" ")}
                       onClick={() => onSelectStudent(student.id)}
                     >{student.name}</button>
-                  </td>
                   {selectedClassId !== 0 && (
-                    <td>
-                      <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
-                      <span className="text-xs sr-only">{student.name} Row</span>
-                        <input name="row"
-                          id={`student-${student.id}-row`}
-                          min="0"
-                          max={layout.rows - 1}
-                          type="number"
-                          value={assignment?.row ?? 0}
-                          onChange={handleSeatChange}
-                          data-student-id={student.id}
-                          data-previous-value
-                        />
-                      </label>
-                    </td>
+                      <div className="student-info flex gap-3 items-center">
+                        <span className="text-xs">📣 {classAssignments?.spokeUpCount ?? 0}</span>
+                        <span className="text-xs">🚫 {classAssignments?.disruptiveCount ?? 0}</span> 
+                        {/* <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
+                          <span className="text-xs sr-only">{student.name} Row</span>
+                          <input name="row"
+                            id={`student-${student.id}-row`}
+                            min="0"
+                            max={layout.rows - 1}
+                            type="number"
+                            value={classAssignments?.row ?? 0}
+                            onChange={handleSeatChange}
+                            data-student-id={student.id}
+                            data-previous-value
+                          />
+                        </label>
+                        <label htmlFor={`student-${student.id}-column`} className="items-center space-between flex gap-1">
+                          <span className="text-xs sr-only">{student.name} Column</span>
+                          <input name="column"
+                            id={`student-${student.id}-column`}
+                            min="0"
+                            max={layout.columns - 1}
+                            type="number"
+                            value={classAssignments?.column ?? 0}
+                            onChange={handleSeatChange}
+                            data-student-id={student.id}
+                            data-previous-value
+                          />
+                        </label> */}
+                      </div>
                   )}
-                  {selectedClassId !== 0 && (
-                    <td>
-                      <label htmlFor={`student-${student.id}-column`} className="items-center space-between flex gap-1">
-                        <span className="text-xs sr-only">{student.name} Column</span>
-                        <input name="column"
-                          id={`student-${student.id}-column`}
-                          min="0"
-                          max={layout.columns - 1}
-                          type="number"
-                          value={assignment?.column ?? 0}
-                          onChange={handleSeatChange}
-                          data-student-id={student.id}
-                          data-previous-value
-                        />
-                      </label>
-                    </td>
-                  )}
-                </tr>
+                </li>
               );
             })}
-          </tbody>
-        </table>
+          </ul>
+        </div>
       </form>
     </div>
   )

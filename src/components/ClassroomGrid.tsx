@@ -89,9 +89,10 @@ export default function ClassroomGrid({
 
   return (
     <div className={[
-      "overflow-hidden",
-      selectedClassId === null || students.length > 0 ? "block" : "hidden"
-    ].join(" ")}>
+        "overflow-hidden",
+        selectedClassId && students.length > 0 ? "block" : "hidden"
+      ].join(" ")}
+    >
       <div className="flex gap-2 items-center mb-2 justify-between">
         <h2 className="mb-0!" id="class-name">{selectedClass?.name}</h2>
         <p className="mb-0!">
@@ -109,16 +110,6 @@ export default function ClassroomGrid({
           style={{
             gridTemplateRows: `repeat(${rows}, 60px)`,
             gridTemplateColumns: `repeat(${columns}, 120px)`,
-          }}
-          onClick={(e) => {
-            const targetEl = e.target as HTMLElement;
-            
-            console.log(e.target);
-            if (!targetEl.closest('.seat-cell-occupied')) {
-              console.log("not an occupied cell");
-              
-              onSelectStudent(0);
-            }
           }}
         >
           {Array.from({ length: rows }).map((_, rowIndex) =>
@@ -208,7 +199,6 @@ function DraggableStudent({ student, onSelectStudent, students, selectedClassId 
       background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
       color: lightness > 50 ? 'black' : 'white'
     };
-    console.log(color);
     return color;
   }
 

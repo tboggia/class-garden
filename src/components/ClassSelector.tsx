@@ -22,11 +22,11 @@ export default function ClassSelector({
         <>
           <h2>Classes</h2>
           {classes.length > 0 && (
-            <ul className="inline-flex flex-row gap-3 mr-6">
+            <ul className="inline-flex flex-row gap-4 flex-wrap">
               {[...classes].sort((a, b) => a.name.localeCompare(b.name)).map((cls) => (
                 <li
                   className={[
-                    "cursor-pointer",
+                    "cursor-pointer last:mr-8",
                     cls.id == selectedClassId ? "font-bold" : "font-normal",
                   ].join(" ")}
                   key={cls.id}
