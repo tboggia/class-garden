@@ -83,6 +83,10 @@ label.label-input-text {
   @apply flex justify-between;
 }
 
+.grid-container {
+  height: calc(100vh - var(--spacing) * 12);
+}
+
 /**
 * Tables
 */
@@ -96,8 +100,6 @@ tbody tr:not(:last-child) td{
   @apply pb-1;
 }
 
-
-
 @media (prefers-color-scheme: light) {
   #root {
     color: #213547;
@@ -110,3 +112,4 @@ tbody tr:not(:last-child) td{
     background-color: #f9f9f9;
   }
 }
+

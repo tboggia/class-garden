@@ -28,9 +28,10 @@ export default function ClassroomGrid({
   const { rows, columns } = layout;
 
   const getStudentsAt = (row: number, col: number) => {
-    return students.filter(
-      (student) => student.row === row && student.column === col
-    );
+    return students.filter((student) => {
+      const assignment = student.classAssignments[selectedClassId ?? 0];
+      return assignment && assignment.row === row && assignment.column === col;
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -43,7 +44,10 @@ export default function ClassroomGrid({
     const newRow = Number(row);
     const newColumn = Number(column);
 
-    const seatTaken = students.some((s) => s.row === newRow && s.column === newColumn);
+    const seatTaken = students.some((s) => {
+      const assignment = s.classAssignments[selectedClassId ?? 0];
+      return assignment && assignment.row === newRow && assignment.column === newColumn;
+    });
     if (seatTaken) return;
 
     onSeatChange(studentId as number, newRow, newColumn);
@@ -127,6 +131,7 @@ export default function ClassroomGrid({
                   column={colIndex}
                   studentsInSeat={studentsInSeat}
                   students={students}
+                  selectedClassId={selectedClassId ?? 0}
                   onSelectStudent={onSelectStudent}
                 />
               )
@@ -144,10 +149,11 @@ interface SeatCellProps {
   column: number;
   studentsInSeat: Student[];
   students: Student[];
+  selectedClassId: number;
   onSelectStudent: (id: number) => void;
 }
 
-function SeatCell({ row, column, studentsInSeat, students, onSelectStudent }: SeatCellProps) {
+function SeatCell({ row, column, studentsInSeat, students, selectedClassId, onSelectStudent }: SeatCellProps) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `seat-${row}-${column}`
   });
@@ -166,7 +172,7 @@ function SeatCell({ row, column, studentsInSeat, students, onSelectStudent }: Se
     >
       {studentsInSeat.length > 0 ? (
         studentsInSeat.map(student => (
-          <DraggableStudent key={student.id} student={student} onSelectStudent={onSelectStudent} students={students} />
+          <DraggableStudent key={student.id} student={student} onSelectStudent={onSelectStudent} students={students} selectedClassId={selectedClassId} />
         ))
       ) : ""}
     </div>
@@ -178,20 +184,22 @@ interface DraggableStudentProps {
   student: Student;
   onSelectStudent: (id: number) => void;
   students: Student[];
+  selectedClassId: number;
 }
 
-function DraggableStudent({ student, onSelectStudent, students }: DraggableStudentProps) {
+function DraggableStudent({ student, onSelectStudent, students, selectedClassId }: DraggableStudentProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: student ? student.id : ''
   })
 
   const getSpokeUpColor = () => {
     if (!students) return { background: 'rgb(4, 47, 46)', color: 'white' };
-    
-    const minSpeakUp = Math.min(...students.map(s => s.spokeUpCount));
-    const maxSpeakUp = Math.max(...students.map(s => s.spokeUpCount));
 
-    const normalized = (maxSpeakUp - minSpeakUp) ? (Number(student.spokeUpCount) - minSpeakUp) / (maxSpeakUp - minSpeakUp) : 1;
+    const minSpeakUp = Math.min(...students.map(s => s.classAssignments[selectedClassId]?.spokeUpCount ?? 0));
+    const maxSpeakUp = Math.max(...students.map(s => s.classAssignments[selectedClassId]?.spokeUpCount ?? 0));
+
+    const studentCount = student.classAssignments[selectedClassId]?.spokeUpCount ?? 0;
+    const normalized = (maxSpeakUp - minSpeakUp) ? (studentCount - minSpeakUp) / (maxSpeakUp - minSpeakUp) : 1;
     
     const hue = 160; // teal hue
     const saturation = 20 + normalized * 90; // 30% to 90%
@@ -234,7 +242,7 @@ function DraggableStudent({ student, onSelectStudent, students }: DraggableStude
       </span>
       <p
         className={[
-          "overflow-wrap leading-0 col-span-full row-span-full"
+          "overflow-wrap col-span-full row-span-full"
         ].join(" ")} 
       >{student.name}</p>
     </div>

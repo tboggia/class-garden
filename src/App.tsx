@@ -6,6 +6,7 @@ import ClassroomGrid from './components/ClassroomGrid';
 import StudentDetailPanel from './components/StudentDetailPanel';
 import './App.css'
 import LayoutSettingsPanel from './components/LayoutSettingsPanel';
+import { assignSeatInGrid } from './utils/seating';
 
 function App() {
   const [selectedBackupKey, setSelectedBackupKey] = useState<string>('');
@@ -20,6 +21,18 @@ function App() {
     columns: 1,
     teacher: ""
   });
+
+  const handleAddStudent = (name: string) => {
+    if (!selectedClassId) return;
+    const { cell, layout: newLayout } = assignSeatInGrid(students, selectedClassId, layout);
+    if (newLayout !== layout) setLayout(newLayout);
+    const newStudent: Student = {
+      id: students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1,
+      name,
+      classAssignments: { [selectedClassId]: { row: cell.row, column: cell.column, spokeUpCount: 0, disruptiveCount: 0 } },
+    };
+    setStudents([...students, newStudent]);
+  };
 
   useEffect(() => {
     if (hasLoaded.current) return;
@@ -65,16 +78,21 @@ function App() {
 
   return (
     <>
-      <div className="grid grid-cols-[280px_1fr] grid-rows-[auto_1fr] gap-6 w-full max-w-350 m-6">
+      <div className={[
+          "grid-container grid gap-6 w-full max-w-350 m-6",
+        students.length > 0 ? "grid-cols-[280px_1fr]  grid-rows-[auto_auto_1fr]" : "grid-rows-[auto_1fr] items-center"
+        ].join(" ")}>
         <div className="col-span-full flex justify-between items-center">
           <h1>{layout.teacher ? layout.teacher + (layout.teacher[layout.teacher.length - 1] === "s" ? "' " : "'s ") : ""}Class Garden</h1>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="button-small"
-            aria-label="Settings"
-          >
-            ⚙️
-          </button>
+            {students.length > 0 && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="button-small"
+                aria-label="Settings"
+              >
+                ⚙️
+              </button>
+            )}
         </div>
 
         {students.length === 0 && (
@@ -103,99 +121,109 @@ function App() {
                 setStudents([...students, ...importedStudents]);
                 setClasses([...classes, ...importedClasses]);
               }}
-              onAddStudent={(name) => {
-                if (!selectedClassId) return;
-                const newStudent: Student = {
-                  id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
-                  name,
-                  classId: selectedClassId,
-                  row: 0,
-                  column: 0,
-                  spokeUpCount: 0,
-                  disruptiveCount: 0
-                };
-                setStudents([...students, newStudent]);
-              }}
+              onAddStudent={handleAddStudent}
             />
-            
+
           </div>
         )}
-
-        <div id="sidebar" className={[
-          "flex-col gap-6",
-          students.length === 0 ? "hidden" : "flex"
-        ].join(" ")}>
-          <ClassSelector
-            classes={classes}
-            selectedClassId={selectedClassId}
-            context='sidebar'
-            onSelectClass={(id) => {
-              if (id !== selectedClassId) {
-                setSelectedClassId(id);
-              } else {
-                setSelectedClassId(0);
-              }
-              setSelectedStudentId(null);
-            }}
-            onAddClass={(name) => {
-              const newClass: Class = {
-                id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
-                name
-              };
-              setClasses([...classes, newClass]);
-            }}
-          />
-          <StudentList
-            students={students.filter((student) => selectedClassId === 0 || student.classId === selectedClassId)}
-            selectedStudentId={selectedStudentId}
-            layout={layout}
-            onSelectStudent={setSelectedStudentId}
-            onUpdateSeating={(id, row, column) => {
-              setStudents(
-                students.map((student) =>
-                  student.id === id ? { ...student, row, column } : student
+        {students.length > 0 && (
+          <div className="col-span-full flex justify-between items-center">
+            <ClassSelector
+              classes={classes}
+              selectedClassId={selectedClassId}
+              context='sidebar'
+              onSelectClass={(id) => {
+                if (id !== selectedClassId) {
+                  setSelectedClassId(id);
+                } else {
+                  setSelectedClassId(0);
+                }
+                setSelectedStudentId(null);
+              }}
+              onAddClass={(name) => {
+                const newClass: Class = {
+                  id: classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1,
+                  name
+                };
+                setClasses([...classes, newClass]);
+              }}
+            />
+          </div>
+        )}
+        {students.length > 0 && (
+          <div id="sidebar" className={[
+            "flex-col gap-6 overflow-scroll",
+            selectedClassId ? '' : 'col-span-full'
+          ].join(" ")}>
+            <StudentList
+              students={students.filter((student) => selectedClassId === 0 || student.classAssignments[selectedClassId] !== undefined)}
+              selectedStudentId={selectedStudentId}
+              selectedClassId={selectedClassId}
+              layout={layout}
+              onSelectStudent={setSelectedStudentId}
+              onUpdateSeating={(id, row, column) => {
+                setStudents(
+                  students.map((student) =>
+                    student.id === id
+                      ? { ...student, classAssignments: { ...student.classAssignments, [selectedClassId]: { ...student.classAssignments[selectedClassId], row, column } } }
+                      : student
+                  )
                 )
-              )
-            }}
-          />
-        </div>
-        <div id="classroom-grid" className="flex flex-col gap-6 w-full overflow-hidden">
-          <ClassroomGrid
-            layout={layout}
-            students={students.filter((student) => selectedClassId === null || student.classId === selectedClassId)}
-            selectedClass={classes.find((cls) => cls.id === selectedClassId) || null}
-            selectedClassId={selectedClassId}
-            onSelectStudent={setSelectedStudentId}
-            onSeatChange={(id, row, column) => {
-              setStudents(
-                students.map((student) =>
-                  student.id === id ? { ...student, row, column } : student
+              }}
+            />
+          </div>
+        )}
+        {students.length > 0 && (
+          <div id="classroom-grid" className={[
+            "flex flex-col gap-6 w-full overflow-hidden",
+            selectedClassId ? '' : 'hidden'
+          ].join(" ")}>
+            <ClassroomGrid
+              layout={layout}
+              students={students.filter((student) => selectedClassId === 0 || student.classAssignments[selectedClassId] !== undefined)}
+              selectedClass={classes.find((cls) => cls.id === selectedClassId) || null}
+              selectedClassId={selectedClassId}
+              onSelectStudent={setSelectedStudentId}
+              onSeatChange={(id, row, column) => {
+                setStudents(
+                  students.map((student) =>
+                    student.id === id
+                      ? { ...student, classAssignments: { ...student.classAssignments, [selectedClassId]: { ...student.classAssignments[selectedClassId], row, column } } }
+                      : student
+                  )
                 )
-              )
-            }}
-            onEditClassName={(name) => {
-              setClasses(
-                classes.map((cls) =>
-                  cls.id === selectedClassId ? { ...cls, name } : cls
+              }}
+              onEditClassName={(name) => {
+                setClasses(
+                  classes.map((cls) =>
+                    cls.id === selectedClassId ? { ...cls, name } : cls
+                  )
                 )
-              )
-            }}
-          />
-          <StudentDetailPanel
-            student={students.find((student) => student.id === selectedStudentId) || null}
-            onIncrementValue={(type) => {
-              const incrementType = type as 'spokeUpCount' | 'disruptiveCount';
-              if (selectedStudentId === null) return;
-              setStudents((prevStudents) =>
-                prevStudents.map((student) =>
-                  student.id === selectedStudentId
-                    ? { ...student, [incrementType]: student[incrementType] + 1 }
-                    : student
-                )
-              );
-            }}
-          />
-        </div>
+              }}
+            />
+            <StudentDetailPanel
+              student={students.find((student) => student.id === selectedStudentId) || null}
+              classes={classes}
+              selectedClassId={selectedClassId}
+              onUpdateAssignment={(studentId, classId, field, value) => {
+                setStudents((prevStudents) =>
+                  prevStudents.map((student) => {
+                    if (student.id !== studentId) return student;
+                    const assignment = student.classAssignments[classId];
+                    if (!assignment) return student;
+                    return {
+                      ...student,
+                      classAssignments: {
+                        ...student.classAssignments,
+                        [classId]: { ...assignment, [field]: value },
+                      },
+                    };
+                  })
+                );
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {showSettings && (
@@ -219,19 +247,7 @@ function App() {
                   setStudents([...students, ...importedStudents]);
                   setClasses([...classes, ...importedClasses]);
                 }}
-                onAddStudent={(name) => {
-                  if (!selectedClassId) return;
-                  const newStudent: Student = {
-                    id: students.length > 0 ? students[students.length - 1].id + 1 : 1,
-                    name,
-                    classId: selectedClassId,
-                    row: 0,
-                    column: 0,
-                    spokeUpCount: 0,
-                    disruptiveCount: 0
-                  };
-                  setStudents([...students, newStudent]);
-                }}
+                onAddStudent={handleAddStudent}
               />
             </div>
 

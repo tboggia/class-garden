@@ -83,7 +83,7 @@ export default function LayoutSettingsPanel({
           }}
           onAddClass={(name) => {
             const newClass: Class = {
-              id: classes.length > 0 ? classes[classes.length - 1].id + 1 : 1,
+              id: classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1,
               name
             };
             setClasses([...classes, newClass]);
@@ -99,7 +99,7 @@ export default function LayoutSettingsPanel({
         />
         { selectedClassId !== 0 &&
           <p>
-            <button className="button-small" onClick={() => onAddStudent(prompt("Student name?") || "")}>Add Student</button>
+            <button type="button" className="button-small" onClick={() => onAddStudent(prompt("Student name?") || "")}>Add Student</button>
           </p>
         }
       </form>

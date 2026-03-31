@@ -17,12 +17,13 @@ export default function ClassSelector({
 }: Props) {
   return (
     <div>
-      {context === 'sidebar' && (
+      {context === 'sidebar' 
+       && (
         <>
           <h2>Classes</h2>
           {classes.length > 0 && (
-            <ul className="mb-6">
-              {classes.sort((a, b) => a.name.localeCompare(b.name)).map((cls) => (
+            <ul className="inline-flex flex-row gap-3 mr-6">
+              {[...classes].sort((a, b) => a.name.localeCompare(b.name)).map((cls) => (
                 <li
                   className={[
                     "cursor-pointer",

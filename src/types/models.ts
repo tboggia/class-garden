@@ -7,11 +7,14 @@ export interface Class {
 export interface Student {
   id: number;
   name: string;
-  classId: number;
-  row: number;
-  column: number;
-  spokeUpCount: number;
-  disruptiveCount: number;
+  classAssignments: {
+    [classId: number]: {
+      row: number;
+      column: number;
+      spokeUpCount: number;
+      disruptiveCount: number;
+    };
+  };
 }
 
 export interface LayoutSettings {
