@@ -14,6 +14,7 @@ interface Props {
   onSelectStudent: (id: number) => void;
   onSeatChange: (id: number, row: number, column: number) => void;
   onEditClassName: (name: string) => void;
+  onCallOnRandom: () => void;
 }
 
 export default function ClassroomGrid({
@@ -23,7 +24,8 @@ export default function ClassroomGrid({
   selectedClassId,
   onSelectStudent,
   onSeatChange,
-  onEditClassName
+  onEditClassName,
+  onCallOnRandom,
 }: Props) {
   const { rows, columns } = layout;
 
@@ -103,7 +105,13 @@ export default function ClassroomGrid({
     >
       <div className="flex gap-2 items-center mb-2 justify-between">
         <h2 className="mb-0!" id="class-name">{selectedClass?.name}</h2>
-        <p className="mb-0!">
+        <p className="mb-0! flex gap-2">
+          <button
+            className="button-small"
+            onClick={onCallOnRandom}
+          >
+            Call on random
+          </button>
           <button
             className="button-small"
             onClick={editClassName}

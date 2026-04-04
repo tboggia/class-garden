@@ -93,4 +93,4 @@ globalLayout ?
 
 
 ## To Do:
-* Pick a random student from active class, no repeats.  
+* Pick a random student from active class, no repeats.

@@ -5,7 +5,7 @@ interface Props {
   student: Student | null;
   classes: Class[];
   selectedClassId: number;
-  onUpdateAssignment: (studentId: number, classId: number, field: string, value: number) => void;
+  onUpdateAssignment: (studentId: number, classId: number, field: string, value: number, close?: boolean) => void;
   onClose: () => void;
 }
 
@@ -48,13 +48,13 @@ export default function StudentDetailPanel({
         <form className="flex gap-2 justify-center mb-4">
           <button
             type="button"
-            onClick={() => onUpdateAssignment(student.id, selectedClassId, 'spokeUpCount', activeAssignment.spokeUpCount + 1)}
+            onClick={() => onUpdateAssignment(student.id, selectedClassId, 'spokeUpCount', activeAssignment.spokeUpCount + 1, true)}
           >
             📣 {activeAssignment.spokeUpCount}
           </button>
           <button
             type="button"
-            onClick={() => onUpdateAssignment(student.id, selectedClassId, 'disruptiveCount', activeAssignment.disruptiveCount + 1)}
+            onClick={() => onUpdateAssignment(student.id, selectedClassId, 'disruptiveCount', activeAssignment.disruptiveCount + 1, true)}
           >
             🚫 {activeAssignment.disruptiveCount}
           </button>

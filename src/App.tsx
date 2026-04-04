@@ -34,6 +34,12 @@ function App() {
     setStudents([...students, newStudent]);
   };
 
+  const handleImportStudents = (importedStudents: Student[], importedClasses: Class[]) => {
+    setStudents([...students, ...importedStudents]);
+    setClasses([...classes, ...importedClasses]);
+    setShowSettings(false);
+  };
+
   const handleClearCounts = () => {
     setStudents(students.map(s => ({
       ...s,
@@ -45,6 +51,16 @@ function App() {
       ),
     })));
     setShowSettings(false);
+  };
+
+  const handleCallOnRandom = () => {
+    if (!selectedClassId) return;
+    const classStudents = students.filter(s => s.classAssignments[selectedClassId]);
+    if (classStudents.length === 0) return;
+    const minSpoken = Math.min(...classStudents.map(s => s.classAssignments[selectedClassId].spokeUpCount));
+    const candidates = classStudents.filter(s => s.classAssignments[selectedClassId].spokeUpCount === minSpoken);
+    const picked = candidates[Math.floor(Math.random() * candidates.length)];
+    setSelectedStudentId(picked.id);
   };
 
   useEffect(() => {
@@ -130,8 +146,7 @@ function App() {
               setClasses={setClasses}
               onUpdateLayout={setLayout}
               onImportStudents={(importedStudents, importedClasses) => {
-                setStudents([...students, ...importedStudents]);
-                setClasses([...classes, ...importedClasses]);
+                handleImportStudents(importedStudents, importedClasses);
               }}
               onAddStudent={handleAddStudent}
             />
@@ -211,6 +226,7 @@ function App() {
                   )
                 )
               }}
+              onCallOnRandom={handleCallOnRandom}
             />
           </div>
         )}
@@ -220,7 +236,7 @@ function App() {
             classes={classes}
             selectedClassId={selectedClassId}
             onClose={() => setSelectedStudentId(null)}
-            onUpdateAssignment={(studentId, classId, field, value) => {
+            onUpdateAssignment={(studentId, classId, field, value, close = false) => {
               setStudents((prevStudents) =>
                 prevStudents.map((student) => {
                   if (student.id !== studentId) return student;
@@ -235,6 +251,9 @@ function App() {
                   };
                 })
               );
+              if (close) {
+                setSelectedStudentId(null);
+              }
             }}
           />
         )}
@@ -258,8 +277,7 @@ function App() {
                 setClasses={setClasses}
                 onUpdateLayout={setLayout}
                 onImportStudents={(importedStudents, importedClasses) => {
-                  setStudents([...students, ...importedStudents]);
-                  setClasses([...classes, ...importedClasses]);
+                  handleImportStudents(importedStudents, importedClasses);
                 }}
                 onAddStudent={handleAddStudent}
               />
