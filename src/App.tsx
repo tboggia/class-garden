@@ -134,7 +134,6 @@ function App() {
                 setClasses([...classes, ...importedClasses]);
               }}
               onAddStudent={handleAddStudent}
-              onClearCounts={handleClearCounts}
             />
 
           </div>
@@ -296,11 +295,10 @@ function App() {
                       if (backupData) {
                         try {
                         const parsed = JSON.parse(backupData);
-                        const today = new Date().toISOString().split('T')[0];
 
                         setClasses(parsed.classes || []);
                         setStudents(parsed.students || []);
-                        setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "", lastOpened: today, clearDisruptiveNightly: layout.clearDisruptiveNightly });
+                        setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
                         setSelectedClassId(0);
                         setSelectedStudentId(null);
                         alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
