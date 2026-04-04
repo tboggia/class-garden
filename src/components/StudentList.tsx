@@ -13,42 +13,41 @@ export default function StudentList({
   students,
   selectedStudentId,
   selectedClassId,
-  layout,
   onSelectStudent,
-  onUpdateSeating,
+  // onUpdateSeating,
 }: Props) {
 
-  const handleSeatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const student = students.find(s => s.id === Number(e.target.dataset.studentId));
-    if (!student) return;
+  // const handleSeatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const student = students.find(s => s.id === Number(e.target.dataset.studentId));
+  //   if (!student) return;
 
-    const classAssignments = student.classAssignments[selectedClassId];
-    if (!classAssignments) return;
+  //   const classAssignments = student.classAssignments[selectedClassId];
+  //   if (!classAssignments) return;
 
-    const field = e.target.name as 'row' | 'column';
-    const newValue = Number(e.target.value);
+  //   const field = e.target.name as 'row' | 'column';
+  //   const newValue = Number(e.target.value);
 
-    const sameCell = students.find(stdt => {
-      if (stdt.id === student.id) return false;
-      const other = stdt.classAssignments[selectedClassId];
-      if (!other) return false;
+  //   const sameCell = students.find(stdt => {
+  //     if (stdt.id === student.id) return false;
+  //     const other = stdt.classAssignments[selectedClassId];
+  //     if (!other) return false;
 
-      if (field === 'row') {
-        return other.column === classAssignments.column && other.row === newValue;
-      } else {
-        return other.row === classAssignments.row && other.column === newValue;
-      }
-    });
-    if (sameCell) {
-      e.target.value = e.target.dataset.previousValue || "0";
-      return;
-    }
+  //     if (field === 'row') {
+  //       return other.column === classAssignments.column && other.row === newValue;
+  //     } else {
+  //       return other.row === classAssignments.row && other.column === newValue;
+  //     }
+  //   });
+  //   if (sameCell) {
+  //     e.target.value = e.target.dataset.previousValue || "0";
+  //     return;
+  //   }
 
-    const newRow = field === 'row' ? newValue : classAssignments.row;
-    const newColumn = field === 'column' ? newValue : classAssignments.column;
-    e.target.dataset.previousValue = e.target.value;
-    onUpdateSeating(student.id, newRow, newColumn);
-  }
+  //   const newRow = field === 'row' ? newValue : classAssignments.row;
+  //   const newColumn = field === 'column' ? newValue : classAssignments.column;
+  //   e.target.dataset.previousValue = e.target.value;
+  //   onUpdateSeating(student.id, newRow, newColumn);
+  // }
 
   return (
     <div className={[students.length <= 0 ? "hidden" : "block"].join(" ")}>

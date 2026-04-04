@@ -200,7 +200,7 @@ export default function ImportStudents({
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
       const rows = lines.slice(1);
 
-      importedStudents = rows.map((line, key) => {
+      importedStudents = rows.map((line) => {
         const values = line.split(",").map((v) => v.trim());
         const record: any = {};
 
@@ -255,7 +255,7 @@ export default function ImportStudents({
       if (ctx.classesLoop.length === 0 && !hasHeader) {
         ctx.addNewClass("Imported Class");
       }
-      importedStudents = lines.map((name, key) => {
+      importedStudents = lines.map((name) => {
         const assignedClassId = selectedClassId || ctx.classesLoop[0].id;
         const seat = ctx.assignSeat(assignedClassId);
 
