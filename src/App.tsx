@@ -34,6 +34,19 @@ function App() {
     setStudents([...students, newStudent]);
   };
 
+  const handleClearCounts = () => {
+    setStudents(students.map(s => ({
+      ...s,
+      classAssignments: Object.fromEntries(
+        Object.entries(s.classAssignments).map(([classId, a]) => [
+          classId,
+          { ...a, spokeUpCount: 0, disruptiveCount: 0 },
+        ])
+      ),
+    })));
+    setShowSettings(false);
+  };
+
   useEffect(() => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
@@ -121,6 +134,7 @@ function App() {
                 setClasses([...classes, ...importedClasses]);
               }}
               onAddStudent={handleAddStudent}
+              onClearCounts={handleClearCounts}
             />
 
           </div>
@@ -229,7 +243,7 @@ function App() {
 
       {showSettings && (
         <div className="fixed inset-0 bg-teal-950/95 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
-          <div className="bg-white text-teal-950 rounded-lg p-6 min-w-1/3 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white text-teal-950 rounded-lg p-6 min-w-1/3 max-w-[60ch] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="mb-0!">Settings</h2>
               <button onClick={() => setShowSettings(false)} className="button-small">×</button>
@@ -254,25 +268,25 @@ function App() {
 
             <div>
               <h3 className="mb-3">Data Management</h3>
-              <div className="flex flex-col gap-2 mb-6">
-                <select
-                  name="backup selection"
-                  value={selectedBackupKey}
-                  onChange={(e) => setSelectedBackupKey(e.target.value)}
-                >
-                  <option value="" disabled>Select Backup</option>
-                  {Object.keys(localStorage)
-                    .filter(key => key.startsWith('class-garden-data-'))
-                    .sort()
-                    .reverse()
-                    .map(key => (
-                      <option key={key} value={key}>
-                        {key.replace('class-garden-data-', '')}
-                      </option>
-                    ))
-                  }
-                </select>
-                <div>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-row gap-4">
+                  <select
+                    name="backup selection"
+                    value={selectedBackupKey}
+                    onChange={(e) => setSelectedBackupKey(e.target.value)}
+                  >
+                    <option value="" disabled>Select Backup</option>
+                    {Object.keys(localStorage)
+                      .filter(key => key.startsWith('class-garden-data-'))
+                      .sort()
+                      .reverse()
+                      .map(key => (
+                        <option key={key} value={key}>
+                          {key.replace('class-garden-data-', '')}
+                        </option>
+                      ))
+                    }
+                  </select>
                   <button
                     className="button-small"
                     disabled={!selectedBackupKey}
@@ -302,23 +316,28 @@ function App() {
                     Restore Backup
                   </button>
                 </div>
+                {students.length > 0 &&
+                  <p>
+                    <button type="button" className="button-small" onClick={handleClearCounts}>Clear all counts</button>
+                  </p>
+                }
+                <button
+                  className="button-small button-danger w-max mt-6"
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
+                      setClasses([]);
+                      setStudents([]);
+                      setSelectedClassId(0);
+                      setSelectedStudentId(null);
+                      setLayout({ rows: 1, columns: 1, teacher: "" });
+                      localStorage.removeItem("class-garden-data");
+                      setShowSettings(false);
+                    }
+                  }}
+                >
+                  Delete all data
+                </button>
               </div>
-              <button
-                className="button-small button-danger"
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to delete all data? This action cannot be undone.")) {
-                    setClasses([]);
-                    setStudents([]);
-                    setSelectedClassId(0);
-                    setSelectedStudentId(null);
-                    setLayout({ rows: 1, columns: 1, teacher: "" });
-                    localStorage.removeItem("class-garden-data");
-                    setShowSettings(false);
-                  }
-                }}
-              >
-                Delete all data
-              </button>
             </div>
           </div>
         </div>

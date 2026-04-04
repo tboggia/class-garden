@@ -38,37 +38,39 @@ export default function LayoutSettingsPanel({
 
   return (
     <div>
-      <h3>Classroom Settings</h3>
       <form className="flex flex-col gap-4">
-        <label className="label-input-text">
-          Teacher:
-          <input
-            type="text"
-            name="teacher"
-            value={layout.teacher}
-            onChange={handleSettingChange}
-          />
-        </label>
-        <label className="label-input-number">
-          Rows: 
-          <input 
-            type="number" 
-            min={1}
-            name="rows" 
-            value={layout.rows}
-            onChange={handleSettingChange}
-          />
-        </label>
-        <label className="label-input-number">
-          Columns: 
-          <input 
-            type="number" 
-            min={1}
-            name="columns" 
-            value={layout.columns}
-            onChange={handleSettingChange}
-          />
-        </label>
+        <div className="flex flex-col gap-2">
+          <h3 className="!mb-0">Classroom Settings</h3>
+          <label className="label-input-text">
+            Teacher:
+            <input
+              type="text"
+              name="teacher"
+              value={layout.teacher}
+              onChange={handleSettingChange}
+            />
+          </label>
+          <label className="label-input-number">
+            Rows:
+            <input
+              type="number"
+              min={1}
+              name="rows"
+              value={layout.rows}
+              onChange={handleSettingChange}
+            />
+          </label>
+          <label className="label-input-number">
+            Columns:
+            <input
+              type="number"
+              min={1}
+              name="columns"
+              value={layout.columns}
+              onChange={handleSettingChange}
+            />
+          </label>
+        </div>
         <ClassSelector
           classes={classes}
           selectedClassId={selectedClassId}

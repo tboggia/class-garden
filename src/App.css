@@ -55,7 +55,7 @@ button:focus, button:focus-visible,
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-.button-small {
+.button-small, ::file-selector-button  {
   @apply px-2 py-1 text-sm;
 }
 .button-danger {
@@ -81,6 +81,9 @@ label {
 label.label-input-number,
 label.label-input-text {
   @apply flex justify-between;
+}
+select {
+    @apply border rounded-md p-1 text-sm max-w-[30ch];
 }
 
 .grid-container {

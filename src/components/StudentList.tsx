@@ -55,7 +55,7 @@ export default function StudentList({
       <form name="Students List">
         <div className="student-list w-full" id="student-list-wrapper">
           <ul className={[
-              "list-none ml-0 gap-4 flex ",
+              "list-none ml-0 mr-2 gap-4 flex",
               selectedClassId ? "flex-col" : "flex-wrap",
             ].join(" ")}>
             {students.sort((a, b) => a.name.localeCompare(b.name)).map((student) => {
@@ -73,8 +73,8 @@ export default function StudentList({
                     >{student.name}</button>
                   {selectedClassId !== 0 && (
                       <div className="student-info flex gap-3 items-center">
-                        <span className="text-xs">📣 {classAssignments[selectedClassId].spokeUpCount ?? 0}</span>
-                        <span className="text-xs">🚫 {classAssignments[selectedClassId].disruptiveCount ?? 0}</span> 
+                        <span className="text-sm">📣 {classAssignments[selectedClassId].spokeUpCount ?? 0}</span>
+                        <span className="text-sm">🚫 {classAssignments[selectedClassId].disruptiveCount ?? 0}</span> 
                         {/* <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
                           <span className="text-xs sr-only">{student.name} Row</span>
                           <input name="row"

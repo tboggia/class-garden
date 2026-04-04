@@ -276,8 +276,8 @@ export default function ImportStudents({
   return (
     <div>
       <h3 className="">Import Students</h3>
-      <p className="text-sm text-gray-400 mb-2">
-        Upload a CSV (one name per line, or with headers) or a "Print Class Rosters" XLS export from Aeries.
+      <p className="text-sm text-gray-800 mb-2">
+        Use the "Print Class Rosters" XLS export from Aeries or upload a CSV (one student per line, can use 'name', 'class', 'row', 'column', 'spokeUpCount', 'disruptiveCount' headers).
       </p>
       <label htmlFor="csv-import" className="max-w-40 flex flex-col gap-2">
         <input id="csv-import" type="file" accept=".csv,.xlsx,.xls" onChange={(e) => handleFileImport(e)} />

@@ -93,8 +93,4 @@ globalLayout ?
 
 
 ## To Do:
-* Pick a random student from active class, no repeats.
-* Reset negatives daily (checkbox in settings)
-* Reset speaking
-* Click out of StudentDetailPanel
-* 
+* Pick a random student from active class, no repeats.  

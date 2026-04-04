@@ -114,7 +114,7 @@ export default function ClassroomGrid({
       </div>
       <DndContext onDragEnd={handleDragEnd}>
         <div
-          className="grid gap-2 overflow-scroll"
+          className="grid gap-1.5 overflow-scroll"
           style={{
             gridTemplateRows: `repeat(${rows}, 60px)`,
             gridTemplateColumns: `repeat(${columns}, 120px)`,
