@@ -57,7 +57,6 @@ function App() {
         setStudents(parsed.students || []);
         setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
       }
-      console.log("finished saving data");
       return () => {};
     } catch (error) {
       console.warn('Failed to load saved data: ', error)
@@ -278,23 +277,26 @@ function App() {
                     className="button-small"
                     disabled={!selectedBackupKey}
                     onClick={() => {
-                    if (!selectedBackupKey) return;
-                    const backupData = localStorage.getItem(selectedBackupKey);
-                    if (backupData) {
-                      try {
-                      const parsed = JSON.parse(backupData);
-                      setClasses(parsed.classes || []);
-                      setStudents(parsed.students || []);
-                      setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
-                      setSelectedClassId(0);
-                      setSelectedStudentId(null);
-                      alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
-                      setSelectedBackupKey('');
-                      } catch (error) {
-                      alert("Failed to restore backup: Invalid backup data.");
+                      if (!selectedBackupKey) return;
+                      const backupData = localStorage.getItem(selectedBackupKey);
+                      if (backupData) {
+                        try {
+                        const parsed = JSON.parse(backupData);
+                        const today = new Date().toISOString().split('T')[0];
+
+                        setClasses(parsed.classes || []);
+                        setStudents(parsed.students || []);
+                        setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "", lastOpened: today, clearDisruptiveNightly: layout.clearDisruptiveNightly });
+                        setSelectedClassId(0);
+                        setSelectedStudentId(null);
+                        alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
                         setSelectedBackupKey('');
+                        
+                        } catch (error) {
+                          alert("Failed to restore backup: Invalid backup data.");
+                          setSelectedBackupKey('');
+                        }
                       }
-                    }
                     }}
                   >
                     Restore Backup

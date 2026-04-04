@@ -275,7 +275,7 @@ export default function ImportStudents({
 
   return (
     <div>
-      <h3 className="">Import Students:</h3>
+      <h3 className="">Import Students</h3>
       <p className="text-sm text-gray-400 mb-2">
         Upload a CSV (one name per line, or with headers) or a "Print Class Rosters" XLS export from Aeries.
       </p>
