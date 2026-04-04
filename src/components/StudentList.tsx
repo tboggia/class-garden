@@ -59,7 +59,7 @@ export default function StudentList({
               selectedClassId ? "flex-col" : "flex-wrap",
             ].join(" ")}>
             {students.sort((a, b) => a.name.localeCompare(b.name)).map((student) => {
-              const classAssignments = student.classAssignments[selectedClassId];
+              const classAssignments = student.classAssignments;
               return (
                 <li className="student-list-item flex gap-2 justify-between" key={student.id}>
                     <button
@@ -73,8 +73,8 @@ export default function StudentList({
                     >{student.name}</button>
                   {selectedClassId !== 0 && (
                       <div className="student-info flex gap-3 items-center">
-                        <span className="text-xs">📣 {classAssignments?.spokeUpCount ?? 0}</span>
-                        <span className="text-xs">🚫 {classAssignments?.disruptiveCount ?? 0}</span> 
+                        <span className="text-xs">📣 {classAssignments[selectedClassId].spokeUpCount ?? 0}</span>
+                        <span className="text-xs">🚫 {classAssignments[selectedClassId].disruptiveCount ?? 0}</span> 
                         {/* <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
                           <span className="text-xs sr-only">{student.name} Row</span>
                           <input name="row"
