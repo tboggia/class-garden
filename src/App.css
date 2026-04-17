@@ -104,7 +104,7 @@ tbody tr:not(:last-child) td{
 }
 
 @media (prefers-color-scheme: light) {
-  #root {
+  /* #root {
     color: #213547;
     background-color: #ffffff;
   }
@@ -113,6 +113,6 @@ tbody tr:not(:last-child) td{
   }
   button {
     background-color: #f9f9f9;
-  }
+  } */
 }
 
