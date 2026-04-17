@@ -1,10 +1,9 @@
-import type { Student, LayoutSettings } from '../types/models';
+import type { Student } from '../types/models';
 
 interface Props {
   students: Student[];
   selectedStudentId: number | null;
   selectedClassId: number;
-  layout: LayoutSettings;
   onSelectStudent: (id: number) => void;
   onUpdateSeating: (id: number, row: number, column: number) => void;
 }
@@ -14,41 +13,7 @@ export default function StudentList({
   selectedStudentId,
   selectedClassId,
   onSelectStudent,
-  // onUpdateSeating,
 }: Props) {
-
-  // const handleSeatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const student = students.find(s => s.id === Number(e.target.dataset.studentId));
-  //   if (!student) return;
-
-  //   const classAssignments = student.classAssignments[selectedClassId];
-  //   if (!classAssignments) return;
-
-  //   const field = e.target.name as 'row' | 'column';
-  //   const newValue = Number(e.target.value);
-
-  //   const sameCell = students.find(stdt => {
-  //     if (stdt.id === student.id) return false;
-  //     const other = stdt.classAssignments[selectedClassId];
-  //     if (!other) return false;
-
-  //     if (field === 'row') {
-  //       return other.column === classAssignments.column && other.row === newValue;
-  //     } else {
-  //       return other.row === classAssignments.row && other.column === newValue;
-  //     }
-  //   });
-  //   if (sameCell) {
-  //     e.target.value = e.target.dataset.previousValue || "0";
-  //     return;
-  //   }
-
-  //   const newRow = field === 'row' ? newValue : classAssignments.row;
-  //   const newColumn = field === 'column' ? newValue : classAssignments.column;
-  //   e.target.dataset.previousValue = e.target.value;
-  //   onUpdateSeating(student.id, newRow, newColumn);
-  // }
-
   return (
     <div className={[students.length <= 0 ? "hidden" : "block"].join(" ")}>
       <h2>Students</h2>
@@ -58,7 +23,7 @@ export default function StudentList({
               "list-none ml-0 mr-2 gap-4 flex",
               selectedClassId ? "flex-col" : "flex-wrap",
             ].join(" ")}>
-            {students.sort((a, b) => a.name.localeCompare(b.name)).map((student) => {
+            {[...students].sort((a, b) => a.name.localeCompare(b.name)).map((student) => {
               const classAssignments = student.classAssignments;
               return (
                 <li className="student-list-item flex gap-2 justify-between" key={student.id}>
@@ -73,34 +38,8 @@ export default function StudentList({
                     >{student.name}</button>
                   {selectedClassId !== 0 && (
                       <div className="student-info flex gap-3 items-center">
-                        <span className="text-sm">📣 {classAssignments[selectedClassId].spokeUpCount ?? 0}</span>
-                        <span className="text-sm">🚫 {classAssignments[selectedClassId].disruptiveCount ?? 0}</span> 
-                        {/* <label htmlFor={`student-${student.id}-row`} className="items-center space-between flex gap-1">
-                          <span className="text-xs sr-only">{student.name} Row</span>
-                          <input name="row"
-                            id={`student-${student.id}-row`}
-                            min="0"
-                            max={layout.rows - 1}
-                            type="number"
-                            value={classAssignments?.row ?? 0}
-                            onChange={handleSeatChange}
-                            data-student-id={student.id}
-                            data-previous-value
-                          />
-                        </label>
-                        <label htmlFor={`student-${student.id}-column`} className="items-center space-between flex gap-1">
-                          <span className="text-xs sr-only">{student.name} Column</span>
-                          <input name="column"
-                            id={`student-${student.id}-column`}
-                            min="0"
-                            max={layout.columns - 1}
-                            type="number"
-                            value={classAssignments?.column ?? 0}
-                            onChange={handleSeatChange}
-                            data-student-id={student.id}
-                            data-previous-value
-                          />
-                        </label> */}
+                        <span className="text-sm" aria-label={`${student.name} spoke up ${classAssignments[selectedClassId].spokeUpCount ?? 0} times`}>📣 {classAssignments[selectedClassId].spokeUpCount ?? 0}</span>
+                        <span className="text-sm" aria-label={`${student.name} was disruptive ${classAssignments[selectedClassId].disruptiveCount ?? 0} times`}>🚫 {classAssignments[selectedClassId].disruptiveCount ?? 0}</span>
                       </div>
                   )}
                 </li>

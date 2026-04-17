@@ -1,6 +1,7 @@
-import type { 
-  LayoutSettings, 
-  Student, 
+import { useState } from 'react';
+import type {
+  LayoutSettings,
+  Student,
   Class
 } from '../types/models';
 import ClassSelector from './ClassSelector';
@@ -31,10 +32,22 @@ export default function LayoutSettingsPanel({
   onImportStudents,
   onAddStudent,
 }: Props) {
+  const [isAddingStudent, setIsAddingStudent] = useState(false);
+  const [newStudentName, setNewStudentName] = useState('');
+
   const handleSettingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onUpdateLayout({ ...layout, [name]: value });
   }
+
+  const handleAddStudent = () => {
+    const name = newStudentName.trim();
+    if (name) {
+      onAddStudent(name);
+      setNewStudentName('');
+      setIsAddingStudent(false);
+    }
+  };
 
   return (
     <div>
@@ -99,11 +112,29 @@ export default function LayoutSettingsPanel({
           onUpdateLayout={onUpdateLayout}
           onImportStudents={onImportStudents}
         />
-        { selectedClassId !== 0 &&
-          <p>
-            <button type="button" className="button-small" onClick={() => onAddStudent(prompt("Student name?") || "")}>Add Student</button>
-          </p>
-        }
+        {selectedClassId !== 0 && (
+          <div>
+            {isAddingStudent ? (
+              <span className="inline-flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={newStudentName}
+                  autoFocus
+                  placeholder="Student name"
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); handleAddStudent(); }
+                    if (e.key === 'Escape') { setIsAddingStudent(false); setNewStudentName(''); }
+                  }}
+                />
+                <button type="button" className="button-small" onClick={handleAddStudent}>Add</button>
+                <button type="button" className="button-small" onClick={() => { setIsAddingStudent(false); setNewStudentName(''); }}>Cancel</button>
+              </span>
+            ) : (
+              <button type="button" className="button-small" onClick={() => setIsAddingStudent(true)}>Add Student</button>
+            )}
+          </div>
+        )}
       </form>
     </div>
   )

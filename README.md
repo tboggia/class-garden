@@ -1,4 +1,4 @@
-# Class Garden
+# Voice Equity
 The purpose of the app is to help a teacher keep track of how often students in each of the teacher's classes speak up or cause problems. The teacher has the ability to create classes, import student names, assign them to their class, move students from one class to another, and assign "seats" to each student. There is an option for the teacher to define how many rows and columns of desks there are in the classroom.
 
 The UI includes a view of the classroom with the students for each class laid out by their seat assignment and allow the teacher to tap/click on a student and select whether the student spoke up or was disruptive.
@@ -93,4 +93,3 @@ globalLayout ?
 
 
 ## To Do:
-* Pick a random student from active class, no repeats.

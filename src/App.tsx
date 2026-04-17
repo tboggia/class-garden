@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Class, Student, LayoutSettings } from './types/models';
 import ClassSelector from './components/ClassSelector';
 import StudentList from './components/StudentList';
@@ -41,6 +41,7 @@ function App() {
   };
 
   const handleClearCounts = () => {
+    if (!window.confirm("Clear all spoke-up and disruptive counts for every student?")) return;
     setStudents(students.map(s => ({
       ...s,
       classAssignments: Object.fromEntries(
@@ -67,8 +68,8 @@ function App() {
     if (hasLoaded.current) return;
     hasLoaded.current = true;
     try {
-      // Remove all but 5 class-garden-data localStorage items
-      const keys = Object.keys(localStorage).filter(key => key.startsWith('class-garden-data-')).sort();
+      // Remove all but 5 voice-equity-data localStorage items
+      const keys = Object.keys(localStorage).filter(key => key.startsWith('voice-equity-data-')).sort();
       const keysToRemove = keys.length - 5;
       for (let i = 0; i < keysToRemove; i++) {
         localStorage.removeItem(keys[i]);
@@ -77,7 +78,7 @@ function App() {
       console.warn('Failed to clean up old data: ', error)
     }
     try {
-      const saved = localStorage.getItem('class-garden-data');
+      const saved = localStorage.getItem('voice-equity-data');
       
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -86,7 +87,6 @@ function App() {
         setStudents(parsed.students || []);
         setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
       }
-      return () => {};
     } catch (error) {
       console.warn('Failed to load saved data: ', error)
     }
@@ -100,9 +100,20 @@ function App() {
       layout
     };
     const dateString = new Date().toISOString().split('T')[0];
-    localStorage.setItem("class-garden-data", JSON.stringify(data));
-    localStorage.setItem(`class-garden-data-${dateString}`, JSON.stringify(data));
+    localStorage.setItem("voice-equity-data", JSON.stringify(data));
+    localStorage.setItem(`voice-equity-data-${dateString}`, JSON.stringify(data));
   }, [classes, students, layout]);
+
+  useEffect(() => {
+    if (!showSettings) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowSettings(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showSettings]);
+
+  const handleCloseStudentPanel = useCallback(() => setSelectedStudentId(null), []);
 
   return (
     <>
@@ -111,7 +122,7 @@ function App() {
         students.length > 0 ? "grid-cols-[280px_1fr]  grid-rows-[auto_auto_1fr]" : "grid-rows-[auto_1fr] items-center"
         ].join(" ")}>
         <div className="col-span-full flex justify-between items-center">
-          <h1>{layout.teacher ? layout.teacher + (layout.teacher[layout.teacher.length - 1] === "s" ? "' " : "'s ") : ""}Class Garden</h1>
+          <h1>{layout.teacher ? layout.teacher + (layout.teacher[layout.teacher.length - 1] === "s" ? "' " : "'s ") : ""}Voice Equity Tracker</h1>
             {students.length > 0 && (
               <button
                 onClick={() => setShowSettings(true)}
@@ -126,7 +137,7 @@ function App() {
         {students.length === 0 && (
           <div className="welcome-screen col-span-full w-1/2 mx-auto mt-6 flex flex-col gap-4">
             <div className="bg-teal-800 text-teal-100 rounded-md p-4">
-              <p className="mb-2">Welcome to Class Garden! To get started:</p>
+              <p className="mb-2">Welcome to Voice Equity! To get started:</p>
               <ol className="list-decimal list-inside mb-3 ml-3">
                 <li>Write your teacher name</li>
                 <li>Define your classroom desk grid</li>
@@ -186,7 +197,6 @@ function App() {
               students={students.filter((student) => selectedClassId === 0 || student.classAssignments[selectedClassId] !== undefined)}
               selectedStudentId={selectedStudentId}
               selectedClassId={selectedClassId}
-              layout={layout}
               onSelectStudent={setSelectedStudentId}
               onUpdateSeating={(id, row, column) => {
                 setStudents(
@@ -235,7 +245,7 @@ function App() {
             student={students.find((student) => student.id === selectedStudentId) || null}
             classes={classes}
             selectedClassId={selectedClassId}
-            onClose={() => setSelectedStudentId(null)}
+            onClose={handleCloseStudentPanel}
             onUpdateAssignment={(studentId, classId, field, value, close = false) => {
               setStudents((prevStudents) =>
                 prevStudents.map((student) => {
@@ -261,10 +271,16 @@ function App() {
 
       {showSettings && (
         <div className="fixed inset-0 bg-teal-950/95 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
-          <div className="bg-white text-teal-950 rounded-lg p-6 min-w-1/3 max-w-[60ch] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-heading"
+            className="bg-white text-teal-950 rounded-lg p-6 min-w-1/3 max-w-[60ch] max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="mb-0!">Settings</h2>
-              <button onClick={() => setShowSettings(false)} className="button-small">×</button>
+              <h2 id="settings-heading" className="mb-0!">Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="button-small" aria-label="Close settings">×</button>
             </div>
             <div className="mb-3">
               <LayoutSettingsPanel
@@ -294,12 +310,12 @@ function App() {
                   >
                     <option value="" disabled>Select Backup</option>
                     {Object.keys(localStorage)
-                      .filter(key => key.startsWith('class-garden-data-'))
+                      .filter(key => key.startsWith('voice-equity-data-'))
                       .sort()
                       .reverse()
                       .map(key => (
                         <option key={key} value={key}>
-                          {key.replace('class-garden-data-', '')}
+                          {key.replace('voice-equity-data-', '')}
                         </option>
                       ))
                     }
@@ -319,7 +335,7 @@ function App() {
                         setLayout(parsed.layout || { rows: 1, columns: 1, teacher: "" });
                         setSelectedClassId(0);
                         setSelectedStudentId(null);
-                        alert(`Restored backup from ${selectedBackupKey.replace('class-garden-data-', '')}`);
+                        alert(`Restored backup from ${selectedBackupKey.replace('voice-equity-data-', '')}`);
                         setSelectedBackupKey('');
                         
                         } catch (error) {
@@ -346,7 +362,7 @@ function App() {
                       setSelectedClassId(0);
                       setSelectedStudentId(null);
                       setLayout({ rows: 1, columns: 1, teacher: "" });
-                      localStorage.removeItem("class-garden-data");
+                      localStorage.removeItem("voice-equity-data");
                       setShowSettings(false);
                     }
                   }}

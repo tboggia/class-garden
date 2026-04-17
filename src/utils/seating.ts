@@ -1,5 +1,9 @@
 import type { Student, LayoutSettings } from '../types/models';
 
+export function nextId(items: { id: number }[]): number {
+  return items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
+}
+
 export function findEmptyCell(students: Student[], classId: number, layout: LayoutSettings): { row: number; column: number } | null {
   const rows = Number(layout.rows);
   const cols = Number(layout.columns);

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Student, Class, LayoutSettings } from '../types/models';
 import {
   DndContext,
@@ -28,6 +29,8 @@ export default function ClassroomGrid({
   onCallOnRandom,
 }: Props) {
   const { rows, columns } = layout;
+  const [isEditingClassName, setIsEditingClassName] = useState(false);
+  const [classNameInput, setClassNameInput] = useState('');
 
   const getStudentsAt = (row: number, col: number) => {
     return students.filter((student) => {
@@ -42,7 +45,7 @@ export default function ClassroomGrid({
 
     if (!dropTarget) return;
 
-    const [_, row, column] = dropTarget.split("-");
+    const [, row, column] = dropTarget.split("-");
     const newRow = Number(row);
     const newColumn = Number(column);
 
@@ -63,39 +66,18 @@ export default function ClassroomGrid({
     onSeatChange(studentId, newRow, newColumn);
   }
 
-  const editClassName = () => {
-    const classElement = document.getElementById('class-name');
-    if (!classElement) return;
-    
-    const changeName = () => {
-      
-      const newName = editElement.value.trim();
-      if (newName && selectedClass) {
-        onEditClassName(newName);
-      }
-      editElement.replaceWith(classElement);
+  const startEditClassName = () => {
+    setClassNameInput(selectedClass?.name || '');
+    setIsEditingClassName(true);
+  };
+
+  const commitClassName = () => {
+    const newName = classNameInput.trim();
+    if (newName && selectedClass) {
+      onEditClassName(newName);
     }
-
-    const editElement = document.createElement('input');
-    
-    editElement.type = 'text';
-    editElement.value = selectedClass?.name || '';
-
-    classElement.replaceWith(editElement);
-    editElement.focus();
-
-    editElement.onblur = changeName;
-
-    editElement.onkeyup = (e) => {
-      if (e.key === "Enter") {
-        editElement.onblur = null;
-        changeName();
-      } else if (e.key === "Escape") {
-        editElement.onblur = null;
-        editElement.replaceWith(classElement);
-      }
-    };
-  }
+    setIsEditingClassName(false);
+  };
 
   return (
     <div className={[
@@ -104,7 +86,22 @@ export default function ClassroomGrid({
       ].join(" ")}
     >
       <div className="flex gap-2 items-center mb-2 justify-between">
-        <h2 className="mb-0!" id="class-name">{selectedClass?.name}</h2>
+        {isEditingClassName ? (
+          <input
+            type="text"
+            value={classNameInput}
+            autoFocus
+            className="text-2xl font-bold"
+            onChange={(e) => setClassNameInput(e.target.value)}
+            onBlur={commitClassName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.currentTarget.blur(); }
+              if (e.key === 'Escape') { setIsEditingClassName(false); }
+            }}
+          />
+        ) : (
+          <h2 className="mb-0!" id="class-name">{selectedClass?.name}</h2>
+        )}
         <p className="mb-0! flex gap-2">
           <button
             className="button-small"
@@ -114,7 +111,7 @@ export default function ClassroomGrid({
           </button>
           <button
             className="button-small"
-            onClick={editClassName}
+            onClick={startEditClassName}
           >
             Rename class
           </button>
@@ -122,6 +119,7 @@ export default function ClassroomGrid({
       </div>
       <DndContext onDragEnd={handleDragEnd}>
         <div
+          role="grid"
           className="grid gap-1.5 overflow-scroll"
           style={{
             gridTemplateRows: `repeat(${rows}, 60px)`,
@@ -164,12 +162,17 @@ function SeatCell({ row, column, studentsInSeat, students, selectedClassId, onSe
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `seat-${row}-${column}`
   });
+
+  const dropBg = isOver
+    ? (studentsInSeat.length > 0 ? "bg-amber-200" : "bg-teal-100")
+    : (students.length > 0 ? "bg-rose-100" : "bg-gray-200");
+
   return (
     <div
       className={[
         studentsInSeat.length > 0 ? "seat-cell-occupied" : '',
         "seat-cell rounded-md border border-gray-400 transition-colors duration-750 ease-in-out",
-        isOver ? "bg-teal-100" : students.length > 0 ? "bg-rose-100" : "bg-gray-200",
+        dropBg,
         studentsInSeat.length > 1 ? 'grid' : 'block',
       ].join(" ")}
       ref={setDropRef}
@@ -207,11 +210,11 @@ function DraggableStudent({ student, onSelectStudent, students, selectedClassId 
 
     const studentCount = student.classAssignments[selectedClassId]?.spokeUpCount ?? 0;
     const normalized = (maxSpeakUp - minSpeakUp) ? (studentCount - minSpeakUp) / (maxSpeakUp - minSpeakUp) : 1;
-    
+
     const hue = 160; // teal hue
     const saturation = 20 + normalized * 90; // 30% to 90%
     const lightness = 60 - normalized * 50; // 70% to 40%
-    const color: { background: string; color: string } = { 
+    const color: { background: string; color: string } = {
       background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
       color: lightness > 50 ? 'black' : 'white'
     };
@@ -242,14 +245,14 @@ function DraggableStudent({ student, onSelectStudent, students, selectedClassId 
         ].join(" ")}
         {...listeners}
         {...attributes}
-        aria-label="Drag Element"
+        aria-label="Drag to reposition"
       >
           ❖
       </span>
       <p
         className={[
           "overflow-wrap col-span-full row-span-full"
-        ].join(" ")} 
+        ].join(" ")}
       >{student.name}</p>
     </div>
   )

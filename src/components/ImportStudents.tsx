@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import { useState } from 'react';
 import type {
   Student,
   Class,
@@ -13,6 +13,16 @@ interface Props {
   selectedClassId: number | 0;
   onUpdateLayout: (layout: LayoutSettings) => void;
   onImportStudents: (students: Student[] | [], classes: Class[] | []) => void;
+}
+
+interface CSVRecord {
+  name: string;
+  class?: string;
+  classId?: number;
+  row?: string;
+  column?: string;
+  spokeUpCount?: string;
+  disruptiveCount?: string;
 }
 
 /** Convert "Last, First M" or "*Last, First M" to "First M L" */
@@ -86,34 +96,63 @@ export default function ImportStudents({
   onUpdateLayout,
   onImportStudents,
 }: Props) {
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [importMessage, setImportMessage] = useState('');
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setImportStatus('idle');
+    setImportMessage('');
+
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
 
     if (isExcel) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows: (string | number | null)[][] = XLSX.utils.sheet_to_json(sheet, {
-          header: 1,
-          defval: null,
-        });
-        handleAeriesXLS(rows);
+      reader.onload = async (event) => {
+        try {
+          const XLSX = await import('xlsx');
+          const data = new Uint8Array(event.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows: (string | number | null)[][] = XLSX.utils.sheet_to_json(sheet, {
+            header: 1,
+            defval: null,
+          });
+          handleAeriesXLS(rows);
+        } catch (err) {
+          console.error('Failed to parse Excel file:', err);
+          setImportStatus('error');
+          setImportMessage('Failed to read Excel file. Please check the file format.');
+        }
+      };
+      reader.onerror = () => {
+        setImportStatus('error');
+        setImportMessage('Failed to read the file.');
       };
       reader.readAsArrayBuffer(file);
     } else {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const text = event.target?.result as string;
-        handleCSVImport(text);
+        try {
+          const text = event.target?.result as string;
+          handleCSVImport(text);
+        } catch (err) {
+          console.error('Failed to parse CSV file:', err);
+          setImportStatus('error');
+          setImportMessage('Failed to read CSV file. Please check the file format.');
+        }
+      };
+      reader.onerror = () => {
+        setImportStatus('error');
+        setImportMessage('Failed to read the file.');
       };
       reader.readAsText(file);
     }
+
+    // Reset the input so the same file can be re-imported if needed
+    e.target.value = '';
   };
 
   const handleAeriesXLS = (rows: (string | number | null)[][]) => {
@@ -184,8 +223,11 @@ export default function ImportStudents({
       }
     }
 
+    const count = studentsByName.size;
     onUpdateLayout(ctx.currentLayout);
     onImportStudents(Array.from(studentsByName.values()), ctx.importedClasses);
+    setImportStatus('success');
+    setImportMessage(`Imported ${count} student${count !== 1 ? 's' : ''} across ${ctx.importedClasses.length} class${ctx.importedClasses.length !== 1 ? 'es' : ''}.`);
   };
 
   const handleCSVImport = (text: string) => {
@@ -202,16 +244,16 @@ export default function ImportStudents({
 
       importedStudents = rows.map((line) => {
         const values = line.split(",").map((v) => v.trim());
-        const record: any = {};
+        const record: CSVRecord = { name: '' };
 
         headers.forEach((h, i) => {
-          record[h] = values[i];
+          (record as unknown as Record<string, string>)[h] = values[i];
           if (h === 'class') {
             const studentClass = ctx.classesLoop.find(c => c.name === record.class);
 
             if (studentClass) {
               record.classId = studentClass.id;
-            } else {
+            } else if (record.class) {
               const newClass = ctx.addNewClass(record.class);
               record.classId = newClass.id;
             }
@@ -271,6 +313,8 @@ export default function ImportStudents({
     }
     onUpdateLayout(ctx.currentLayout);
     onImportStudents(importedStudents, ctx.importedClasses);
+    setImportStatus('success');
+    setImportMessage(`Imported ${importedStudents.length} student${importedStudents.length !== 1 ? 's' : ''}.`);
   }
 
   return (
@@ -282,6 +326,12 @@ export default function ImportStudents({
       <label htmlFor="csv-import" className="max-w-40 flex flex-col gap-2">
         <input id="csv-import" type="file" accept=".csv,.xlsx,.xls" onChange={(e) => handleFileImport(e)} />
       </label>
+      {importStatus === 'success' && (
+        <p className="text-sm text-teal-700 mt-2">{importMessage}</p>
+      )}
+      {importStatus === 'error' && (
+        <p className="text-sm text-red-600 mt-2">{importMessage}</p>
+      )}
     </div>
   )
 }
