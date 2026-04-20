@@ -119,7 +119,7 @@ function App() {
     <>
       <div className={[
           "grid-container grid gap-6 w-full max-w-350 m-6",
-        students.length > 0 ? "grid-cols-[280px_1fr]  grid-rows-[auto_auto_1fr]" : "grid-rows-[auto_1fr] items-center"
+        students.length > 0 ? "grid-cols-[215px_1fr]  grid-rows-[auto_auto_1fr]" : "grid-rows-[auto_1fr] items-center"
         ].join(" ")}>
         <div className="col-span-full flex justify-between items-center">
           <h1>{layout.teacher ? layout.teacher + (layout.teacher[layout.teacher.length - 1] === "s" ? "' " : "'s ") : ""}Voice Equity Tracker</h1>

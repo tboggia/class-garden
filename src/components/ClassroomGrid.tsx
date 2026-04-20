@@ -123,7 +123,7 @@ export default function ClassroomGrid({
           className="grid gap-1.5 overflow-scroll"
           style={{
             gridTemplateRows: `repeat(${rows}, 60px)`,
-            gridTemplateColumns: `repeat(${columns}, 120px)`,
+            gridTemplateColumns: `repeat(${columns}, 105px)`,
           }}
         >
           {Array.from({ length: rows }).map((_, rowIndex) =>
@@ -251,7 +251,7 @@ function DraggableStudent({ student, onSelectStudent, students, selectedClassId 
       </span>
       <p
         className={[
-          "overflow-wrap col-span-full row-span-full"
+          "overflow-wrap col-span-full row-span-full text-sm leading-4"
         ].join(" ")}
       >{student.name}</p>
     </div>
